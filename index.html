@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERG Restoration | Claim your $5 gift card</title>
+  <meta name="robots" content="noindex">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f7fa;color:#1a2332;line-height:1.5;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .card{max-width:480px;width:100%;background:#fff;border-radius:12px;padding:32px 28px;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+    .brand{color:#1a73e8;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+    h1{font-size:24px;margin-bottom:12px;line-height:1.3}
+    p.sub{color:#5a6878;margin-bottom:24px}
+    .step{margin-bottom:22px}
+    .label{font-weight:600;font-size:12px;color:#1a73e8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .btn-link{display:block;background:#1a73e8;color:#fff;text-decoration:none;text-align:center;padding:14px 16px;border-radius:8px;font-weight:600;transition:background .15s}
+    .btn-link:hover{background:#1557b0}
+    label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#1a2332}
+    input[type=text],input[type=email],input[type=tel]{width:100%;padding:12px;border:1px solid #d0d7de;border-radius:8px;font-size:16px;margin-bottom:16px;transition:border .15s;font-family:inherit}
+    input:focus{outline:none;border-color:#1a73e8}
+    button.submit{width:100%;background:#34a853;color:#fff;border:0;padding:14px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background .15s}
+    button.submit:hover{background:#2c8e44}
+    button.submit:disabled{background:#9aa5b1;cursor:not-allowed}
+    .success{display:none;text-align:center;padding:18px 0}
+    .success.show{display:block}
+    .success-icon{font-size:48px;margin-bottom:12px;color:#34a853}
+    .error{color:#d93025;font-size:13px;margin-top:-8px;margin-bottom:12px;display:none}
+    .error.show{display:block}
+    .footer{text-align:center;color:#5a6878;font-size:12px;margin-top:24px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">ERG Restoration</div>
+
+    <div id="form-view">
+      <h1>Thanks for choosing us. Here's a $5 gift card for an honest review.</h1>
+      <p class="sub">Two quick steps. Takes about a minute.</p>
+
+      <div class="step">
+        <div class="label">Step 1: leave the review</div>
+        <a href="#" id="review-link" class="btn-link" target="_blank" rel="noopener">Open Google Reviews</a>
+      </div>
+
+      <div class="step">
+        <div class="label">Step 2: get your card</div>
+        <form id="claim-form" novalidate>
+          <label for="name">Your name</label>
+          <input type="text" id="name" name="name" autocomplete="name" required>
+
+          <label for="contact">Email or phone</label>
+          <input type="text" id="contact" name="contact" autocomplete="email" placeholder="you@example.com or +1..." required>
+          <div class="error" id="contact-error">Please enter a valid email or phone</div>
+
+          <button type="submit" class="submit" id="submit-btn">I left the review, send my $5 card</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="success-view" class="success">
+      <div class="success-icon">✓</div>
+      <h1>Card on the way</h1>
+      <p class="sub" id="success-msg"></p>
+    </div>
+
+    <div class="footer">ERG Restoration · Water damage restoration across Canada</div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const city = (params.get('city') || 'default').toLowerCase();
+
+    // City -> Google review URL. Replace with real review_link Google Business profiles per city.
+    const CITY_LINKS = {
+      'toronto':   'https://www.google.com/maps/place/?q=ERG+Restoration+Toronto',
+      'vancouver': 'https://www.google.com/maps/place/?q=ERG+Restoration+Vancouver',
+      'edmonton':  'https://www.google.com/maps/place/?q=ERG+Restoration+Edmonton',
+      'winnipeg':  'https://www.google.com/maps/place/?q=ERG+Restoration+Winnipeg',
+      'default':   'https://www.google.com/search?q=ERG+Restoration+Canada+reviews'
+    };
+    document.getElementById('review-link').href = CITY_LINKS[city] || CITY_LINKS['default'];
+
+    const SUBMIT_URL = 'https://n8n.fifthstar.io/webhook/erg-giftogram-submit';
+
+    const form = document.getElementById('claim-form');
+    const btn = document.getElementById('submit-btn');
+    const err = document.getElementById('contact-error');
+
+    function validContact(v){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || /^\+?[\d\s\-().]{7,}$/.test(v);
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.classList.remove('show');
+      const name = document.getElementById('name').value.trim();
+      const contact = document.getElementById('contact').value.trim();
+      if (!validContact(contact)) { err.classList.add('show'); return; }
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = 'Sending...';
+      try {
+        const res = await fetch(SUBMIT_URL, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ name, contact, city, ts: new Date().toISOString(), ua: navigator.userAgent })
+        });
+        if (!res.ok) throw new Error('http ' + res.status);
+        document.getElementById('form-view').style.display = 'none';
+        document.getElementById('success-view').classList.add('show');
+        document.getElementById('success-msg').textContent = `Sending to ${contact}. Check your inbox in a minute.`;
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = original;
+        alert('Could not send right now. Please try again or reach us at ergrestoration.com.');
+      }
+    });
+  </script>
+</body>
+</html>
