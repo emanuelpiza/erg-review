@@ -5,6 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ERG Restoration | Claim your $5 gift card</title>
   <meta name="robots" content="noindex">
+
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '26923651513991737');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=26923651513991737&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f7fa;color:#1a2332;line-height:1.5;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -107,6 +125,7 @@
           body: JSON.stringify({ name, contact, city, ts: new Date().toISOString(), ua: navigator.userAgent })
         });
         if (!res.ok) throw new Error('http ' + res.status);
+        if (window.fbq) fbq('track', 'Lead');
         document.getElementById('form-view').style.display = 'none';
         document.getElementById('success-view').classList.add('show');
         document.getElementById('success-msg').textContent = `Sending to ${contact}. Check your inbox in a minute.`;
