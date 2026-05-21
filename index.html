@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>localhub | Claim your $5 gift card</title>
+  <title>Share your feedback</title>
   <meta name="robots" content="noindex">
 
   <!-- Meta Pixel Code -->
@@ -25,35 +25,71 @@
   <!-- End Meta Pixel Code -->
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f7fa;color:#1a2332;line-height:1.5;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-    .card{max-width:480px;width:100%;background:#fff;border-radius:12px;padding:32px 28px;box-shadow:0 4px 16px rgba(0,0,0,.08)}
-    .brand{color:#1a73e8;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
-    h1{font-size:24px;margin-bottom:12px;line-height:1.3}
-    p.sub{color:#5a6878;margin-bottom:24px}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0b1d3a;color:#1a2332;line-height:1.5;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .card{max-width:520px;width:100%;background:#fff;border-radius:16px;padding:40px 32px;box-shadow:0 4px 24px rgba(0,0,0,.25)}
+    .brand-logo{display:flex;align-items:center;justify-content:center;background:#566c84;color:#fff;font-weight:700;font-size:18px;padding:14px 24px;border-radius:6px;margin:0 auto 28px;max-width:fit-content;letter-spacing:.5px}
+    h1{font-size:22px;text-align:center;margin-bottom:8px;line-height:1.35;font-weight:700}
+    p.sub{color:#5a6878;text-align:center;font-size:14px;margin-bottom:32px}
+    .rating-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px}
+    .rating-btn{background:#f5f7fa;border:0;border-radius:12px;padding:24px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;transition:all .15s;font-family:inherit}
+    .rating-btn:hover{background:#e8ecf2;transform:translateY(-2px)}
+    .rating-emoji{font-size:48px;line-height:1}
+    .rating-label{font-size:13px;font-weight:700;color:#1a2332}
     .step{margin-bottom:22px}
     .label{font-weight:600;font-size:12px;color:#1a73e8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
     .btn-link{display:block;background:#1a73e8;color:#fff;text-decoration:none;text-align:center;padding:14px 16px;border-radius:8px;font-weight:600;transition:background .15s}
     .btn-link:hover{background:#1557b0}
     label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#1a2332}
-    input[type=text],input[type=email],input[type=tel]{width:100%;padding:12px;border:1px solid #d0d7de;border-radius:8px;font-size:16px;margin-bottom:16px;transition:border .15s;font-family:inherit}
-    input:focus{outline:none;border-color:#1a73e8}
-    button.submit{width:100%;background:#34a853;color:#fff;border:0;padding:14px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background .15s}
+    input[type=text],input[type=email],input[type=tel],textarea{width:100%;padding:12px;border:1px solid #d0d7de;border-radius:8px;font-size:16px;margin-bottom:16px;transition:border .15s;font-family:inherit}
+    textarea{min-height:90px;resize:vertical}
+    input:focus,textarea:focus{outline:none;border-color:#1a73e8}
+    button.submit{width:100%;background:#34a853;color:#fff;border:0;padding:14px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background .15s;font-family:inherit}
     button.submit:hover{background:#2c8e44}
     button.submit:disabled{background:#9aa5b1;cursor:not-allowed}
-    .success{display:none;text-align:center;padding:18px 0}
-    .success.show{display:block}
+    button.submit.negative{background:#1a73e8}
+    button.submit.negative:hover{background:#1557b0}
+    .success{text-align:center;padding:18px 0}
     .success-icon{font-size:48px;margin-bottom:12px;color:#34a853}
     .error{color:#d93025;font-size:13px;margin-top:-8px;margin-bottom:12px;display:none}
     .error.show{display:block}
-    .footer{text-align:center;color:#5a6878;font-size:12px;margin-top:24px}
+    .view{display:none}
+    .view.active{display:block}
+    .back{display:inline-block;color:#5a6878;font-size:13px;margin-bottom:16px;cursor:pointer;text-decoration:none}
+    .back:hover{color:#1a73e8}
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="brand">localhub</div>
 
-    <div id="form-view">
-      <h1>Thanks for choosing us. Here's a $5 gift card for an honest review.</h1>
+    <!-- View 1: Rating gate -->
+    <div id="view-rating" class="view active">
+      <div class="brand-logo" id="brand-logo">Local Hub</div>
+      <h1 id="rating-question">How was your experience with us?</h1>
+      <p class="sub">Your opinion matters to us. Thank you for your feedback!</p>
+      <div class="rating-grid">
+        <button class="rating-btn" data-rating="excellent" aria-label="Excellent">
+          <span class="rating-emoji">😀</span>
+          <span class="rating-label">Excellent</span>
+        </button>
+        <button class="rating-btn" data-rating="good" aria-label="Good">
+          <span class="rating-emoji">🙂</span>
+          <span class="rating-label">Good</span>
+        </button>
+        <button class="rating-btn" data-rating="ok" aria-label="OK">
+          <span class="rating-emoji">😐</span>
+          <span class="rating-label">OK</span>
+        </button>
+        <button class="rating-btn" data-rating="bad" aria-label="Bad">
+          <span class="rating-emoji">🙁</span>
+          <span class="rating-label">Bad</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- View 2a: Positive (Excellent/Good) -->
+    <div id="view-positive" class="view">
+      <a class="back" data-back>← Back</a>
+      <h1>Thanks! Get $5 for an honest Google review</h1>
       <p class="sub">Two quick steps. Takes about a minute.</p>
 
       <div class="step">
@@ -63,76 +99,163 @@
 
       <div class="step">
         <div class="label">Step 2: get your card</div>
-        <form id="claim-form" novalidate>
-          <label for="name">Your name</label>
-          <input type="text" id="name" name="name" autocomplete="name" required>
+        <form id="form-positive" novalidate>
+          <label for="p-name">Your name</label>
+          <input type="text" id="p-name" name="name" autocomplete="name" required>
 
-          <label for="contact">Email or phone</label>
-          <input type="text" id="contact" name="contact" autocomplete="email" placeholder="you@example.com or +1..." required>
-          <div class="error" id="contact-error">Please enter a valid email or phone</div>
+          <label for="p-contact">Email or phone</label>
+          <input type="text" id="p-contact" name="contact" autocomplete="email" placeholder="you@example.com or +1..." required>
+          <div class="error" id="p-error">Please enter a valid email or phone</div>
 
-          <button type="submit" class="submit" id="submit-btn">I left the review, send my $5 card</button>
+          <button type="submit" class="submit" id="p-submit">I left the review, send my $5 card</button>
         </form>
       </div>
     </div>
 
-    <div id="success-view" class="success">
-      <div class="success-icon">✓</div>
-      <h1>Card on the way</h1>
-      <p class="sub" id="success-msg"></p>
+    <!-- View 2b: Negative (OK/Bad) -->
+    <div id="view-negative" class="view">
+      <a class="back" data-back>← Back</a>
+      <h1>We're sorry. Help us do better</h1>
+      <p class="sub">Tell us what went wrong. The owner reads every message.</p>
+
+      <form id="form-negative" novalidate>
+        <label for="n-name">Your name</label>
+        <input type="text" id="n-name" name="name" autocomplete="name" required>
+
+        <label for="n-contact">Email or phone</label>
+        <input type="text" id="n-contact" name="contact" autocomplete="email" placeholder="you@example.com or +1..." required>
+        <div class="error" id="n-error">Please enter a valid email or phone</div>
+
+        <label for="n-comment">What went wrong</label>
+        <textarea id="n-comment" name="comment" required></textarea>
+
+        <button type="submit" class="submit negative" id="n-submit">Send feedback</button>
+      </form>
     </div>
 
-    <div class="footer">localhub · Local home services across Canada</div>
+    <!-- View 3: Success -->
+    <div id="view-success" class="view">
+      <div class="success">
+        <div class="success-icon">✓</div>
+        <h1 id="success-title">Card on the way</h1>
+        <p class="sub" id="success-msg"></p>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    const params = new URLSearchParams(location.search);
-    const city = (params.get('city') || 'default').toLowerCase();
-
-    // City -> Google review URL. Replace with real review_link Google Business profiles per city.
-    const CITY_LINKS = {
-      'toronto':   'https://www.google.com/maps/place/?q=ERG+Restoration+Toronto',
-      'vancouver': 'https://www.google.com/maps/place/?q=ERG+Restoration+Vancouver',
-      'edmonton':  'https://www.google.com/maps/place/?q=ERG+Restoration+Edmonton',
-      'winnipeg':  'https://www.google.com/maps/place/?q=ERG+Restoration+Winnipeg',
-      'default':   'https://www.google.com/search?q=ERG+Restoration+Canada+reviews'
+    // Per-city brand + Google review URL. Add cities here as they roll out.
+    const CITY_CONFIG = {
+      'ottawa':  { brand: 'Maximum Restore Solutions',         reviewUrl: 'https://maps.app.goo.gl/w83Pz6X9325vQkxc7' },
+      'toronto': { brand: 'Downtown Emergency John Plumber',   reviewUrl: 'https://maps.app.goo.gl/CzVN6vMH4VQXycTj8' }
     };
-    document.getElementById('review-link').href = CITY_LINKS[city] || CITY_LINKS['default'];
+
+    const params = new URLSearchParams(location.search);
+    const cityParam = (params.get('city') || 'ottawa').toLowerCase();
+    const cfg = CITY_CONFIG[cityParam] || CITY_CONFIG['ottawa'];
+
+    document.getElementById('brand-logo').textContent = cfg.brand;
+    document.getElementById('rating-question').textContent = `How was your experience with ${cfg.brand}?`;
+    document.getElementById('review-link').href = cfg.reviewUrl;
 
     const SUBMIT_URL = 'https://n8n.fifthstar.io/webhook/erg-giftogram-submit';
 
-    const form = document.getElementById('claim-form');
-    const btn = document.getElementById('submit-btn');
-    const err = document.getElementById('contact-error');
+    const views = {
+      rating:   document.getElementById('view-rating'),
+      positive: document.getElementById('view-positive'),
+      negative: document.getElementById('view-negative'),
+      success:  document.getElementById('view-success')
+    };
+    function show(name){
+      Object.values(views).forEach(v => v.classList.remove('active'));
+      views[name].classList.add('active');
+      window.scrollTo(0,0);
+    }
+
+    let selectedRating = null;
+
+    document.querySelectorAll('.rating-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedRating = btn.dataset.rating;
+        if (selectedRating === 'excellent' || selectedRating === 'good') {
+          show('positive');
+        } else {
+          show('negative');
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-back]').forEach(el => {
+      el.addEventListener('click', () => { selectedRating = null; show('rating'); });
+    });
 
     function validContact(v){
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || /^\+?[\d\s\-().]{7,}$/.test(v);
     }
 
-    form.addEventListener('submit', async (e) => {
+    async function postSubmit(payload){
+      const res = await fetch(SUBMIT_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('http ' + res.status);
+    }
+
+    document.getElementById('form-positive').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const err = document.getElementById('p-error');
       err.classList.remove('show');
-      const name = document.getElementById('name').value.trim();
-      const contact = document.getElementById('contact').value.trim();
+      const name = document.getElementById('p-name').value.trim();
+      const contact = document.getElementById('p-contact').value.trim();
       if (!validContact(contact)) { err.classList.add('show'); return; }
-      btn.disabled = true;
+      const btn = document.getElementById('p-submit');
       const original = btn.textContent;
+      btn.disabled = true;
       btn.textContent = 'Sending...';
       try {
-        const res = await fetch(SUBMIT_URL, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ name, contact, city, ts: new Date().toISOString(), ua: navigator.userAgent })
+        await postSubmit({
+          rating: selectedRating, name, contact, comment: null,
+          city: cityParam, brand: cfg.brand,
+          ts: new Date().toISOString(), ua: navigator.userAgent
         });
-        if (!res.ok) throw new Error('http ' + res.status);
         if (window.fbq) fbq('track', 'Lead');
-        document.getElementById('form-view').style.display = 'none';
-        document.getElementById('success-view').classList.add('show');
+        document.getElementById('success-title').textContent = 'Card on the way';
         document.getElementById('success-msg').textContent = `Sending to ${contact}. Check your inbox in a minute.`;
+        show('success');
       } catch (e) {
         btn.disabled = false;
         btn.textContent = original;
-        alert('Could not send right now. Please try again in a minute.');
+        alert('Could not send right now. Please try again in a moment.');
+      }
+    });
+
+    document.getElementById('form-negative').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = document.getElementById('n-error');
+      err.classList.remove('show');
+      const name = document.getElementById('n-name').value.trim();
+      const contact = document.getElementById('n-contact').value.trim();
+      const comment = document.getElementById('n-comment').value.trim();
+      if (!validContact(contact)) { err.classList.add('show'); return; }
+      const btn = document.getElementById('n-submit');
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      try {
+        await postSubmit({
+          rating: selectedRating, name, contact, comment,
+          city: cityParam, brand: cfg.brand,
+          ts: new Date().toISOString(), ua: navigator.userAgent
+        });
+        document.getElementById('success-title').textContent = 'Thanks for the feedback';
+        document.getElementById('success-msg').textContent = 'The owner will be in touch shortly.';
+        show('success');
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = original;
+        alert('Could not send right now. Please try again in a moment.');
       }
     });
   </script>
