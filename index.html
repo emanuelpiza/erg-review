@@ -102,7 +102,7 @@
     <!-- View 2a: Positive (Excellent/Good) -->
     <div id="view-positive" class="view">
       <a class="back" data-back>← Back</a>
-      <h1>Thanks! Get $5 for an honest Google review</h1>
+      <h1 id="positive-title">Thanks!</h1>
       <p class="sub">Two quick steps. Takes about a minute.</p>
 
       <div class="step">
@@ -111,7 +111,7 @@
       </div>
 
       <div class="step">
-        <div class="label">Step 2: get your card</div>
+        <div class="label" id="positive-step2-label">Step 2: leave your contact</div>
         <form id="form-positive" novalidate>
           <label for="p-name">Your name</label>
           <input type="text" id="p-name" name="name" autocomplete="name" required>
@@ -120,7 +120,7 @@
           <input type="text" id="p-contact" name="contact" autocomplete="email" placeholder="you@example.com or +1..." required>
           <div class="error" id="p-error">Please enter a valid email or phone</div>
 
-          <button type="submit" class="submit" id="p-submit">I left the review, send my $5 card</button>
+          <button type="submit" class="submit" id="p-submit">I left the review</button>
         </form>
       </div>
     </div>
@@ -221,10 +221,26 @@
 
     let selectedRating = null;
 
+    function applyPositiveCopy(rating){
+      const title = document.getElementById('positive-title');
+      const step2Label = document.getElementById('positive-step2-label');
+      const submitBtn = document.getElementById('p-submit');
+      if (rating === 'excellent') {
+        title.textContent = 'Thanks! Get $5 for an honest Google review';
+        step2Label.textContent = 'Step 2: get your card';
+        submitBtn.textContent = 'I left the review, send my $5 card';
+      } else {
+        title.textContent = 'Thanks! Help us with a quick Google review';
+        step2Label.textContent = 'Step 2: leave your contact';
+        submitBtn.textContent = 'I left the review';
+      }
+    }
+
     document.querySelectorAll('.rating-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         selectedRating = btn.dataset.rating;
         if (selectedRating === 'excellent' || selectedRating === 'good') {
+          applyPositiveCopy(selectedRating);
           show('positive');
         } else {
           show('negative');
@@ -267,8 +283,13 @@
           ts: new Date().toISOString(), ua: navigator.userAgent
         });
         if (window.fbq) fbq('track', 'Lead');
-        document.getElementById('success-title').textContent = 'Card on the way';
-        document.getElementById('success-msg').textContent = `Sending to ${contact}. Check your inbox in a minute.`;
+        if (selectedRating === 'excellent') {
+          document.getElementById('success-title').textContent = 'Card on the way';
+          document.getElementById('success-msg').textContent = `Sending to ${contact}. Check your inbox in a minute.`;
+        } else {
+          document.getElementById('success-title').textContent = 'Thanks for the review';
+          document.getElementById('success-msg').textContent = 'We appreciate it.';
+        }
         show('success');
       } catch (e) {
         btn.disabled = false;
