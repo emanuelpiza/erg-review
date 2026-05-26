@@ -74,10 +74,36 @@
       <div class="city-grid" id="city-grid"></div>
     </div>
 
-    <!-- View 1: Main (Google review CTA + gift card form) -->
+    <!-- View 1: Rating gate -->
+    <div id="view-rating" class="view">
+      <div class="brand-logo" id="brand-logo">Local Hub</div>
+      <h1 id="rating-question">How was your experience with us?</h1>
+      <p class="sub">Your opinion matters to us. Thank you for your feedback!</p>
+      <div class="rating-grid">
+        <button class="rating-btn" data-rating="excellent" aria-label="Excellent">
+          <span class="rating-emoji">😀</span>
+          <span class="rating-label">Excellent</span>
+        </button>
+        <button class="rating-btn" data-rating="good" aria-label="Good">
+          <span class="rating-emoji">🙂</span>
+          <span class="rating-label">Good</span>
+        </button>
+        <button class="rating-btn" data-rating="ok" aria-label="OK">
+          <span class="rating-emoji">😐</span>
+          <span class="rating-label">OK</span>
+        </button>
+        <button class="rating-btn" data-rating="bad" aria-label="Bad">
+          <span class="rating-emoji">🙁</span>
+          <span class="rating-label">Bad</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- View 2a: Positive (Excellent/Good) -->
     <div id="view-positive" class="view">
-      <div class="brand-logo">Local Hub</div>
-      <h1>Leave us friendly feedback on google maps, click the link below to take you there!</h1>
+      <a class="back" data-back>← Back</a>
+      <h1 id="positive-title">Thanks!</h1>
+      <p class="sub">Two quick steps. Takes about a minute.</p>
 
       <div class="step">
         <div class="label">Step 1: leave the review</div>
@@ -85,7 +111,7 @@
       </div>
 
       <div class="step">
-        <div class="label">Step 2: get your $5 card</div>
+        <div class="label" id="positive-step2-label">Step 2: leave your contact</div>
         <form id="form-positive" novalidate>
           <label for="p-name">Your name</label>
           <input type="text" id="p-name" name="name" autocomplete="name" required>
@@ -94,7 +120,7 @@
           <input type="text" id="p-contact" name="contact" autocomplete="email" placeholder="you@example.com or +1..." required>
           <div class="error" id="p-error">Please enter a valid email or phone</div>
 
-          <button type="submit" class="submit" id="p-submit">I left the review, send my $5 card</button>
+          <button type="submit" class="submit" id="p-submit">I left the review</button>
         </form>
       </div>
     </div>
@@ -148,6 +174,7 @@
 
     const views = {
       city:     document.getElementById('view-city'),
+      rating:   document.getElementById('view-rating'),
       positive: document.getElementById('view-positive'),
       negative: document.getElementById('view-negative'),
       success:  document.getElementById('view-success')
@@ -160,6 +187,8 @@
 
     function applyCity(slug){
       cfg = CITY_CONFIG[slug];
+      document.getElementById('brand-logo').textContent = cfg.brand;
+      document.getElementById('rating-question').textContent = `How was your experience with ${cfg.brand}?`;
       document.getElementById('review-link').href = cfg.reviewUrl;
       // Reflect choice in URL without reloading, so refresh keeps the city
       const url = new URL(location.href);
@@ -176,21 +205,52 @@
       btn.innerHTML = `<span>${info.label}</span><span class="city-arrow">→</span>`;
       btn.addEventListener('click', () => {
         applyCity(slug);
-        show('positive');
+        show('rating');
       });
       grid.appendChild(btn);
     });
 
     if (cfg) {
-      // City came from URL param: skip picker, go straight to the review CTA
+      // City came from URL param: skip picker, go straight to rating
       applyCity(cityParam);
-      show('positive');
+      show('rating');
     } else {
       // No valid city: show picker
       show('city');
     }
 
-    const selectedRating = 'positive';
+    let selectedRating = null;
+
+    function applyPositiveCopy(rating){
+      const title = document.getElementById('positive-title');
+      const step2Label = document.getElementById('positive-step2-label');
+      const submitBtn = document.getElementById('p-submit');
+      if (rating === 'excellent') {
+        title.textContent = 'Thanks! Get $5 for an honest Google review';
+        step2Label.textContent = 'Step 2: get your card';
+        submitBtn.textContent = 'I left the review, send my $5 card';
+      } else {
+        title.textContent = 'Thanks! Help us with a quick Google review';
+        step2Label.textContent = 'Step 2: leave your contact';
+        submitBtn.textContent = 'I left the review';
+      }
+    }
+
+    document.querySelectorAll('.rating-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedRating = btn.dataset.rating;
+        if (selectedRating === 'excellent' || selectedRating === 'good') {
+          applyPositiveCopy(selectedRating);
+          show('positive');
+        } else {
+          show('negative');
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-back]').forEach(el => {
+      el.addEventListener('click', () => { selectedRating = null; show('rating'); });
+    });
 
     function validContact(v){
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || /^\+?[\d\s\-().]{7,}$/.test(v);
