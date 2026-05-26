@@ -77,7 +77,7 @@
     <!-- View 1: Rating gate -->
     <div id="view-rating" class="view">
       <div class="brand-logo" id="brand-logo">Local Hub</div>
-      <h1 id="rating-question">How was your experience with us?</h1>
+      <h1 id="rating-question">Leave us friendly feedback on google maps, click below on one of the options to take you there!</h1>
       <p class="sub">Your opinion matters to us. Thank you for your feedback!</p>
       <div class="rating-grid">
         <button class="rating-btn" data-rating="excellent" aria-label="Excellent">
@@ -187,8 +187,8 @@
 
     function applyCity(slug){
       cfg = CITY_CONFIG[slug];
-      document.getElementById('brand-logo').textContent = cfg.brand;
-      document.getElementById('rating-question').textContent = `How was your experience with ${cfg.brand}?`;
+      // Brand shown to user is always "Local Hub", not the per-city brand.
+      // Per-city brand is used in backend notifications only (and as the Google review target via reviewUrl).
       document.getElementById('review-link').href = cfg.reviewUrl;
       // Reflect choice in URL without reloading, so refresh keeps the city
       const url = new URL(location.href);
