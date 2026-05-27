@@ -40,7 +40,8 @@
     .btn-link{display:block;background:#1a73e8;color:#fff;text-decoration:none;text-align:center;padding:14px 16px;border-radius:8px;font-weight:600;transition:background .15s}
     .btn-link:hover{background:#1557b0}
     label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#1a2332}
-    input[type=text],input[type=email],input[type=tel],textarea{width:100%;padding:12px;border:1px solid #d0d7de;border-radius:8px;font-size:16px;margin-bottom:16px;transition:border .15s;font-family:inherit}
+    input[type=text],input[type=email],input[type=tel],input[type=file],textarea{width:100%;padding:12px;border:1px solid #d0d7de;border-radius:8px;font-size:16px;margin-bottom:16px;transition:border .15s;font-family:inherit}
+    input[type=file]{background:#f8fafc;font-size:14px}
     textarea{min-height:90px;resize:vertical}
     input:focus,textarea:focus{outline:none;border-color:#1a73e8}
     button.submit{width:100%;background:#34a853;color:#fff;border:0;padding:14px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background .15s;font-family:inherit}
@@ -61,6 +62,8 @@
     .city-btn{background:#f5f7fa;border:0;border-radius:12px;padding:18px 14px;cursor:pointer;font-family:inherit;font-size:16px;font-weight:600;color:#1a2332;text-align:left;transition:all .15s;display:flex;align-items:center;justify-content:space-between}
     .city-btn:hover{background:#e8ecf2;transform:translateY(-1px)}
     .city-arrow{color:#1a73e8;font-size:18px}
+    .helper{color:#5a6878;font-size:12px;margin:-8px 0 14px}
+    .confirm-note{background:#eef6ff;border:1px solid #cfe3ff;color:#244563;border-radius:8px;padding:12px;font-size:13px;margin-bottom:16px}
   </style>
 </head>
 <body>
@@ -120,6 +123,13 @@
           <input type="text" id="p-contact" name="contact" autocomplete="email" placeholder="you@example.com or +1..." required>
           <div class="error" id="p-error">Please enter a valid email or phone</div>
 
+          <label for="p-screenshot">Review screenshot</label>
+          <input type="file" id="p-screenshot" name="screenshot" accept="image/*" required>
+          <p class="helper">Upload a screenshot after submitting the Google review.</p>
+          <div class="error" id="p-screenshot-error">Please upload a review screenshot</div>
+
+          <div class="confirm-note">Our team confirms submissions before sending the thank-you gift.</div>
+
           <button type="submit" class="submit" id="p-submit">I left the review</button>
         </form>
       </div>
@@ -168,6 +178,7 @@
 
     const params = new URLSearchParams(location.search);
     const cityParam = (params.get('city') || '').toLowerCase();
+    let selectedCity = cityParam;
     let cfg = CITY_CONFIG[cityParam] || null;
 
     const SUBMIT_URL = 'https://n8n.fifthstar.io/webhook/erg-giftogram-submit';
@@ -186,6 +197,7 @@
     }
 
     function applyCity(slug){
+      selectedCity = slug;
       cfg = CITY_CONFIG[slug];
       // Brand shown to user is always "Local Hub", not the per-city brand.
       // Per-city brand is used in backend notifications only (and as the Google review target via reviewUrl).
@@ -227,12 +239,12 @@
       const submitBtn = document.getElementById('p-submit');
       if (rating === 'excellent') {
         title.textContent = 'Thanks! Get $5 for an honest Google review';
-        step2Label.textContent = 'Step 2: get your card';
-        submitBtn.textContent = 'I left the review, send my $5 card';
+        step2Label.textContent = 'Step 2: upload screenshot';
+        submitBtn.textContent = 'Submit for gift-card approval';
       } else {
         title.textContent = 'Thanks! Help us with a quick Google review';
-        step2Label.textContent = 'Step 2: leave your contact';
-        submitBtn.textContent = 'I left the review';
+        step2Label.textContent = 'Step 2: upload screenshot';
+        submitBtn.textContent = 'Submit review confirmation';
       }
     }
 
@@ -256,6 +268,42 @@
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || /^\+?[\d\s\-().]{7,}$/.test(v);
     }
 
+    function compressScreenshot(file){
+      return new Promise((resolve, reject) => {
+        if (!file || !file.type || !file.type.startsWith('image/')) {
+          reject(new Error('invalid image'));
+          return;
+        }
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('file read failed'));
+        reader.onload = () => {
+          const img = new Image();
+          img.onerror = () => reject(new Error('image load failed'));
+          img.onload = () => {
+            const maxSide = 1200;
+            const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(img.width * scale));
+            canvas.height = Math.max(1, Math.round(img.height * scale));
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+            resolve({
+              name: file.name,
+              originalType: file.type,
+              type: 'image/jpeg',
+              size: file.size,
+              width: canvas.width,
+              height: canvas.height,
+              dataUrl
+            });
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     async function postSubmit(payload){
       const res = await fetch(SUBMIT_URL, {
         method: 'POST',
@@ -268,24 +316,31 @@
     document.getElementById('form-positive').addEventListener('submit', async (e) => {
       e.preventDefault();
       const err = document.getElementById('p-error');
+      const screenshotErr = document.getElementById('p-screenshot-error');
       err.classList.remove('show');
+      screenshotErr.classList.remove('show');
       const name = document.getElementById('p-name').value.trim();
       const contact = document.getElementById('p-contact').value.trim();
+      const screenshotFile = document.getElementById('p-screenshot').files[0];
       if (!validContact(contact)) { err.classList.add('show'); return; }
+      if (!screenshotFile) { screenshotErr.classList.add('show'); return; }
       const btn = document.getElementById('p-submit');
       const original = btn.textContent;
       btn.disabled = true;
-      btn.textContent = 'Sending...';
+      btn.textContent = 'Uploading...';
       try {
+        const screenshot = await compressScreenshot(screenshotFile);
         await postSubmit({
           rating: selectedRating, name, contact, comment: null,
-          city: cityParam, brand: cfg.brand,
+          city: selectedCity, brand: cfg.brand,
+          screenshot_uploaded: true,
+          screenshot,
           ts: new Date().toISOString(), ua: navigator.userAgent
         });
         if (window.fbq) fbq('track', 'Lead');
         if (selectedRating === 'excellent') {
-          document.getElementById('success-title').textContent = 'Card on the way';
-          document.getElementById('success-msg').textContent = `Sending to ${contact}. Check your inbox in a minute.`;
+          document.getElementById('success-title').textContent = 'Submission received';
+          document.getElementById('success-msg').textContent = `Our team will confirm the screenshot and send the gift card to ${contact}.`;
         } else {
           document.getElementById('success-title').textContent = 'Thanks for the review';
           document.getElementById('success-msg').textContent = 'We appreciate it.';
@@ -313,7 +368,7 @@
       try {
         await postSubmit({
           rating: selectedRating, name, contact, comment,
-          city: cityParam, brand: cfg.brand,
+          city: selectedCity, brand: cfg.brand,
           ts: new Date().toISOString(), ua: navigator.userAgent
         });
         document.getElementById('success-title').textContent = 'Thanks for the feedback';
