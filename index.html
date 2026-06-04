@@ -79,8 +79,6 @@
     .suggestion-box{background:#f8fafc;border:1px solid #d0d7de;border-radius:10px;padding:14px;margin:8px 0 14px}
     .suggestion-box textarea{border:0;background:transparent;padding:0;margin:0;min-height:130px;resize:none;color:#1a2332}
     .suggestion-box textarea:focus{border:0}
-    .button-row{display:grid;grid-template-columns:1fr;gap:10px}
-    @media (min-width:480px){.button-row{grid-template-columns:1fr 1fr}}
     button.copy-btn{width:100%;background:#1a2332;color:#fff;border:0;padding:14px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background .15s;font-family:inherit}
     button.copy-btn:hover{background:#303c4f}
     @media (max-width:480px){
@@ -186,7 +184,7 @@
     <!-- View 2c: Existing customer review helper -->
     <div id="view-customer" class="view">
       <div class="customer-top">
-        <a class="back" data-customer-back>← Change city</a>
+        <a class="back" data-customer-back>← Back</a>
         <a href="#" id="skip-helper-link" class="skip-link" target="_blank" rel="noopener">Skip</a>
       </div>
       <div class="brand-logo">Local Hub</div>
@@ -208,10 +206,7 @@
         <div class="suggestion-box">
           <textarea id="suggested-review" readonly></textarea>
         </div>
-        <div class="button-row">
-          <button type="button" class="copy-btn" id="copy-review">Copy review</button>
-          <a href="#" id="customer-review-link" class="btn-link" target="_blank" rel="noopener">Open Google Reviews</a>
-        </div>
+        <button type="button" class="copy-btn" id="copy-open-review">Copy and open Google Reviews</button>
       </div>
     </div>
 
@@ -265,7 +260,6 @@
       // Brand shown to user is always "Local Hub", not the per-city brand.
       // Per-city brand is used in backend notifications only (and as the Google review target via reviewUrl).
       document.getElementById('review-link').href = cfg.reviewUrl;
-      document.getElementById('customer-review-link').href = cfg.reviewUrl;
       document.getElementById('skip-helper-link').href = cfg.reviewUrl;
       // Reflect choice in URL without reloading, so refresh keeps the city
       const url = new URL(location.href);
@@ -283,7 +277,7 @@
       btn.innerHTML = `<span>${info.label}</span><span class="city-arrow">→</span>`;
       btn.addEventListener('click', () => {
         applyCity(slug);
-        show(isCustomerMode ? 'customer' : 'rating');
+        show('rating');
       });
       grid.appendChild(btn);
     });
@@ -291,12 +285,14 @@
     if (isCustomerMode) {
       document.getElementById('city-title').textContent = 'Choose your location';
       document.getElementById('city-sub').textContent = 'Select the Google profile for your review.';
+      document.getElementById('rating-question').textContent = 'How was your experience?';
+      document.querySelector('#view-rating .sub').textContent = 'Choose one option before leaving a Google review.';
     }
 
     if (cfg) {
       // City came from URL param: skip picker, go straight to rating
       applyCity(cityParam);
-      show(isCustomerMode ? 'customer' : 'rating');
+      show('rating');
     } else {
       // No valid city: show picker
       show('city');
@@ -323,8 +319,13 @@
       btn.addEventListener('click', () => {
         selectedRating = btn.dataset.rating;
         if (selectedRating === 'excellent' || selectedRating === 'good') {
-          applyPositiveCopy(selectedRating);
-          show('positive');
+          if (isCustomerMode) {
+            resetCustomerHelper();
+            show('customer');
+          } else {
+            applyPositiveCopy(selectedRating);
+            show('positive');
+          }
         } else {
           show('negative');
         }
@@ -336,7 +337,7 @@
     });
 
     document.querySelectorAll('[data-customer-back]').forEach(el => {
-      el.addEventListener('click', () => { show('city'); });
+      el.addEventListener('click', () => { show('rating'); });
     });
 
     const customerState = {
@@ -402,6 +403,14 @@
       if (hasService && hasStandout) updateSuggestedReview();
     }
 
+    function resetCustomerHelper(){
+      customerState.service = '';
+      customerState.standouts.clear();
+      document.querySelectorAll('#service-chips .chip, #standout-chips .chip').forEach(chip => chip.classList.remove('selected'));
+      document.getElementById('suggested-review').value = '';
+      updateCustomerSteps();
+    }
+
     buildChips('service-chips', SERVICE_OPTIONS, option => option === customerState.service, (option, btn) => {
       customerState.service = option;
       document.querySelectorAll('#service-chips .chip').forEach(chip => chip.classList.remove('selected'));
@@ -422,10 +431,11 @@
 
     updateCustomerSteps();
 
-    document.getElementById('copy-review').addEventListener('click', async () => {
+    document.getElementById('copy-open-review').addEventListener('click', async () => {
       const textarea = document.getElementById('suggested-review');
-      const btn = document.getElementById('copy-review');
+      const btn = document.getElementById('copy-open-review');
       const original = btn.textContent;
+      const reviewUrl = cfg && cfg.reviewUrl ? cfg.reviewUrl : '#';
       try {
         await navigator.clipboard.writeText(textarea.value);
       } catch (e) {
@@ -435,6 +445,7 @@
       }
       btn.textContent = 'Copied';
       setTimeout(() => { btn.textContent = original; }, 1800);
+      if (reviewUrl && reviewUrl !== '#') window.location.href = reviewUrl;
     });
 
     function validContact(v){
