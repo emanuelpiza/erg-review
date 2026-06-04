@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review helper</title>
+  <meta name="robots" content="noindex">
+  <script>
+    const target = new URL('/?mode=customer', window.location.origin);
+    const current = new URL(window.location.href);
+    current.searchParams.forEach((value, key) => {
+      target.searchParams.set(key, value);
+    });
+    target.searchParams.set('mode', 'customer');
+    window.location.replace(target.toString());
+  </script>
+</head>
+<body>
+  <a href="/?mode=customer">Continue to review helper</a>
+</body>
+</html>
