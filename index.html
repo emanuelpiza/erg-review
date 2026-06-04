@@ -58,6 +58,10 @@
     .view.active{display:block}
     .back{display:inline-block;color:#5a6878;font-size:13px;margin-bottom:16px;cursor:pointer;text-decoration:none}
     .back:hover{color:#1a73e8}
+    .customer-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .customer-top .back{margin-bottom:0}
+    .skip-link{color:#1a73e8;font-size:13px;font-weight:600;text-decoration:none}
+    .skip-link:hover{color:#1557b0}
     .city-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
     @media (min-width:480px){.city-grid{grid-template-columns:1fr 1fr}}
     .city-btn{background:#f5f7fa;border:0;border-radius:12px;padding:18px 14px;cursor:pointer;font-family:inherit;font-size:16px;font-weight:600;color:#1a2332;text-align:left;transition:all .15s;display:flex;align-items:center;justify-content:space-between}
@@ -70,6 +74,8 @@
     .chip{background:#f5f7fa;border:1px solid transparent;border-radius:10px;padding:12px 14px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:#1a2332;text-align:left;transition:all .15s;min-width:0;white-space:normal;overflow-wrap:anywhere}
     .chip:hover{background:#e8ecf2}
     .chip.selected{background:#eef6ff;border-color:#1a73e8;color:#1557b0}
+    .customer-step{display:none}
+    .customer-step.visible{display:block}
     .suggestion-box{background:#f8fafc;border:1px solid #d0d7de;border-radius:10px;padding:14px;margin:8px 0 14px}
     .suggestion-box textarea{border:0;background:transparent;padding:0;margin:0;min-height:130px;resize:none;color:#1a2332}
     .suggestion-box textarea:focus{border:0}
@@ -179,22 +185,25 @@
 
     <!-- View 2c: Existing customer review helper -->
     <div id="view-customer" class="view">
-      <a class="back" data-customer-back>← Change city</a>
+      <div class="customer-top">
+        <a class="back" data-customer-back>← Change city</a>
+        <a href="#" id="skip-helper-link" class="skip-link" target="_blank" rel="noopener">Skip</a>
+      </div>
       <div class="brand-logo">Local Hub</div>
       <h1>Review helper</h1>
       <p class="sub">Pick a few details, copy the review, then open Google Reviews.</p>
 
-      <div class="step">
+      <div class="step customer-step visible" id="customer-step-service">
         <div class="label">Service</div>
         <div class="chip-grid" id="service-chips"></div>
       </div>
 
-      <div class="step">
+      <div class="step customer-step" id="customer-step-standout">
         <div class="label">What stood out</div>
         <div class="chip-grid" id="standout-chips"></div>
       </div>
 
-      <div class="step">
+      <div class="step customer-step" id="customer-step-review">
         <div class="label">Suggested review</div>
         <div class="suggestion-box">
           <textarea id="suggested-review" readonly></textarea>
@@ -257,6 +266,7 @@
       // Per-city brand is used in backend notifications only (and as the Google review target via reviewUrl).
       document.getElementById('review-link').href = cfg.reviewUrl;
       document.getElementById('customer-review-link').href = cfg.reviewUrl;
+      document.getElementById('skip-helper-link').href = cfg.reviewUrl;
       // Reflect choice in URL without reloading, so refresh keeps the city
       const url = new URL(location.href);
       url.searchParams.set('city', slug);
@@ -330,8 +340,8 @@
     });
 
     const customerState = {
-      service: 'emergency service',
-      standouts: new Set(['fast response', 'clear communication'])
+      service: '',
+      standouts: new Set()
     };
 
     const SERVICE_OPTIONS = [
@@ -352,6 +362,15 @@
       'good follow-up'
     ];
 
+    const STANDOUT_COPY = {
+      'fast response': 'responded quickly',
+      'professional team': 'were professional',
+      'clear communication': 'communicated clearly',
+      'careful cleanup': 'handled the cleanup carefully',
+      'help with the process': 'helped with the process',
+      'good follow-up': 'followed up well'
+    };
+
     function buildChips(containerId, options, selected, onClick){
       const container = document.getElementById(containerId);
       options.forEach(option => {
@@ -368,18 +387,26 @@
       const textarea = document.getElementById('suggested-review');
       if (!textarea) return;
       const service = customerState.service || 'emergency service';
-      const standouts = Array.from(customerState.standouts);
+      const standouts = Array.from(customerState.standouts).map(item => STANDOUT_COPY[item] || item);
       const standoutText = standouts.length
         ? standouts.join(', ').replace(/, ([^,]*)$/, ' and $1')
-        : 'helpful and professional';
-      textarea.value = `Great experience with the team. They helped with ${service} and were ${standoutText}. The process was clear, the team was responsive, and I would recommend them.`;
+        : 'were helpful and professional';
+      textarea.value = `Great experience with the team. They helped with ${service}. They ${standoutText}. The process was clear, the team was responsive, and I would recommend them.`;
+    }
+
+    function updateCustomerSteps(){
+      const hasService = Boolean(customerState.service);
+      const hasStandout = customerState.standouts.size > 0;
+      document.getElementById('customer-step-standout').classList.toggle('visible', hasService);
+      document.getElementById('customer-step-review').classList.toggle('visible', hasService && hasStandout);
+      if (hasService && hasStandout) updateSuggestedReview();
     }
 
     buildChips('service-chips', SERVICE_OPTIONS, option => option === customerState.service, (option, btn) => {
       customerState.service = option;
       document.querySelectorAll('#service-chips .chip').forEach(chip => chip.classList.remove('selected'));
       btn.classList.add('selected');
-      updateSuggestedReview();
+      updateCustomerSteps();
     });
 
     buildChips('standout-chips', STANDOUT_OPTIONS, option => customerState.standouts.has(option), (option, btn) => {
@@ -390,10 +417,10 @@
         customerState.standouts.add(option);
         btn.classList.add('selected');
       }
-      updateSuggestedReview();
+      updateCustomerSteps();
     });
 
-    updateSuggestedReview();
+    updateCustomerSteps();
 
     document.getElementById('copy-review').addEventListener('click', async () => {
       const textarea = document.getElementById('suggested-review');
