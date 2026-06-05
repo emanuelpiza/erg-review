@@ -101,6 +101,12 @@
     .like-option{background:#fff;border:1px solid #247899;border-radius:8px;color:#3a84b8;text-align:center;padding:12px 14px;font-size:15px;font-weight:500}
     .like-option:hover{background:#f7fbff}
     .like-option.selected{background:#468fed;border-color:#e2b248;color:#fff;box-shadow:0 0 0 1px #e2b248 inset}
+    @media (min-width:720px){
+      body.customer-review-mode .customer-followup{max-width:680px}
+      body.customer-review-mode .like-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+      body.customer-review-mode .like-option{padding:11px 8px;font-size:13px}
+      body.customer-review-mode .like-option:last-child{grid-column:1 / -1}
+    }
     .suggestion-box{background:#f8fafc;border:1px solid #d0d7de;border-radius:10px;padding:14px;margin:8px 0 14px}
     .suggestion-box textarea{border:0;background:transparent;padding:0;margin:0;min-height:130px;resize:none;color:#1a2332}
     .suggestion-box textarea:focus{border:0}
