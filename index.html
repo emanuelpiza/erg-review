@@ -89,32 +89,33 @@
     .chip{background:#f5f7fa;border:1px solid transparent;border-radius:10px;padding:12px 14px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:#1a2332;text-align:left;transition:all .15s;min-width:0;white-space:normal;overflow-wrap:anywhere}
     .chip:hover{background:#e8ecf2}
     .chip.selected{background:#eef6ff;border-color:#1a73e8;color:#1557b0}
-    .customer-followup{display:none;margin-top:28px}
+    .customer-followup{display:none;margin-top:20px}
     .customer-followup.visible{display:block}
-    .customer-step{display:none;margin-top:28px}
+    .customer-step{display:none;margin-top:20px}
     .customer-step.visible{display:block}
-    .customer-divider{height:1px;background:#e5e9ef;margin:28px 0}
-    .follow-title{font-size:16px;font-weight:700;text-align:left;margin-bottom:14px;line-height:1.35}
+    .customer-divider{height:1px;background:#e5e9ef;margin:22px 0}
+    .follow-title{font-size:15px;font-weight:700;text-align:left;margin-bottom:12px;line-height:1.35}
     .follow-title.center{text-align:center}
-    .edit-hint{font-size:14px;color:#1a2332;margin:-4px 0 10px;text-align:left}
+    .edit-hint{font-size:13px;color:#1a2332;margin:-4px 0 8px;text-align:left}
     .like-grid{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 18px}
-    .like-option{background:#fff;border:1px solid #247899;border-radius:8px;color:#3a84b8;text-align:center;padding:12px 14px;font-size:15px;font-weight:500}
+    .like-option{background:#fff;border:1px solid #247899;border-radius:8px;color:#3a84b8;text-align:center;padding:11px 14px;font-size:14px;font-weight:500}
     .like-option:hover{background:#f7fbff}
-    .like-option.selected{background:#468fed;border-color:#e2b248;color:#fff;box-shadow:0 0 0 1px #e2b248 inset}
+    .like-option.selected{background:#4285f4;border-color:#e2b248;color:#fff;box-shadow:0 0 0 1px #e2b248 inset}
     @media (min-width:720px){
       body.customer-review-mode .customer-followup{max-width:680px}
       body.customer-review-mode .like-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
-      body.customer-review-mode .like-option{padding:11px 8px;font-size:13px}
+      body.customer-review-mode .like-option{padding:10px 8px;font-size:13px}
       body.customer-review-mode .like-option:last-child{grid-column:1 / -1}
     }
     .suggestion-box{background:#f8fafc;border:1px solid #d0d7de;border-radius:10px;padding:14px;margin:8px 0 14px}
     .suggestion-box textarea{border:0;background:transparent;padding:0;margin:0;min-height:130px;resize:none;color:#1a2332}
     .suggestion-box textarea:focus{border:0}
-    .customer-review-box{background:#fff;border-color:#73bd87;border-radius:8px;padding:16px}
-    .customer-review-box textarea{min-height:190px;font-size:14px;line-height:1.35}
+    .customer-review-box{background:#fff;border-color:#73bd87;border-radius:8px;padding:12px;display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;align-items:start}
+    .review-sparkle{color:#73bd87;font-size:18px;line-height:1.2;padding-top:2px;text-align:center}
+    .customer-review-box textarea{min-height:150px;font-size:13px;line-height:1.35}
     button.copy-btn{width:100%;background:#1a2332;color:#fff;border:0;padding:14px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background .15s;font-family:inherit}
-    body.customer-review-mode button.copy-btn{background:#4d8cf0}
-    body.customer-review-mode button.copy-btn:hover{background:#3779de}
+    body.customer-review-mode button.copy-btn{background:#4285f4;font-size:14px;padding:12px}
+    body.customer-review-mode button.copy-btn:hover{background:#2f73e0}
     button.copy-btn:hover{background:#303c4f}
     @media (max-width:480px){
       body{padding:12px;align-items:flex-start}
@@ -177,6 +178,7 @@
           <h3 class="follow-title">Would you be willing to leave a review on Google?</h3>
           <p class="edit-hint">Tap it to make edits if you'd like.</p>
           <div class="suggestion-box customer-review-box">
+            <span class="review-sparkle" aria-hidden="true">✣</span>
             <textarea id="suggested-review"></textarea>
           </div>
           <button type="button" class="copy-btn" id="copy-open-review">Click to copy and go to Google</button>
@@ -371,30 +373,30 @@
     };
 
     const STANDOUT_OPTIONS = [
-      'fast response',
+      'efficient',
       'professional',
-      'clear communication',
-      'careful cleanup',
+      'affordable',
+      'timely',
       'friendly',
       'Everything'
     ];
 
     const STANDOUT_COPY = {
-      'fast response': {
-        sentence: 'The team responded quickly and made it easy to get help when I needed it.',
-        top: 'fast response'
+      'efficient': {
+        sentence: 'The team was efficient, organized, and made the whole process simple.',
+        top: 'efficient service'
       },
       'professional': {
         sentence: 'Everyone I dealt with was professional, respectful, and clear.',
         top: 'professional service'
       },
-      'clear communication': {
-        sentence: 'They explained the process clearly and kept communication simple.',
-        top: 'clear communication'
+      'affordable': {
+        sentence: 'The service was fair, clear, and worth the cost.',
+        top: 'fair pricing'
       },
-      'careful cleanup': {
-        sentence: 'The cleanup was handled carefully and the team paid attention to the details.',
-        top: 'careful cleanup'
+      'timely': {
+        sentence: 'They arrived on time, worked quickly, and kept things moving.',
+        top: 'timely service'
       },
       'friendly': {
         sentence: 'The team was friendly, helpful, and easy to work with.',
