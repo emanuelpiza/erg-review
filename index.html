@@ -36,6 +36,12 @@
     .rating-btn:hover{background:#e8ecf2;transform:translateY(-2px)}
     .rating-emoji{font-size:48px;line-height:1}
     .rating-label{font-size:13px;font-weight:700;color:#1a2332}
+    body.customer-review-mode .card{padding-top:36px}
+    body.customer-review-mode .rating-grid{grid-template-columns:1fr;gap:18px;max-width:250px;margin:8px auto 0}
+    body.customer-review-mode .rating-btn{background:transparent;border-radius:10px;padding:0 0 8px;gap:8px}
+    body.customer-review-mode .rating-btn:hover{background:transparent;transform:none}
+    body.customer-review-mode .rating-emoji{display:flex;align-items:center;justify-content:center;width:152px;height:152px;background:#f5f7fa;border-radius:10px;font-size:82px;box-shadow:0 1px 2px rgba(0,0,0,.02)}
+    body.customer-review-mode .rating-label{font-size:18px}
     .step{margin-bottom:22px}
     .label{font-weight:600;font-size:12px;color:#1a73e8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
     .btn-link{display:block;background:#1a73e8;color:#fff;text-decoration:none;text-align:center;padding:14px 16px;border-radius:8px;font-weight:600;transition:background .15s}
@@ -62,6 +68,7 @@
     .customer-top .back{margin-bottom:0}
     .skip-link{color:#1a73e8;font-size:13px;font-weight:600;text-decoration:none}
     .skip-link:hover{color:#1557b0}
+    .rating-top{display:flex;justify-content:flex-end;margin:-10px 0 8px}
     .city-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
     @media (min-width:480px){.city-grid{grid-template-columns:1fr 1fr}}
     .city-btn{background:#f5f7fa;border:0;border-radius:12px;padding:18px 14px;cursor:pointer;font-family:inherit;font-size:16px;font-weight:600;color:#1a2332;text-align:left;transition:all .15s;display:flex;align-items:center;justify-content:space-between}
@@ -74,12 +81,26 @@
     .chip{background:#f5f7fa;border:1px solid transparent;border-radius:10px;padding:12px 14px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:#1a2332;text-align:left;transition:all .15s;min-width:0;white-space:normal;overflow-wrap:anywhere}
     .chip:hover{background:#e8ecf2}
     .chip.selected{background:#eef6ff;border-color:#1a73e8;color:#1557b0}
-    .customer-step{display:none}
+    .customer-followup{display:none;margin-top:28px}
+    .customer-followup.visible{display:block}
+    .customer-step{display:none;margin-top:28px}
     .customer-step.visible{display:block}
+    .customer-divider{height:1px;background:#e5e9ef;margin:28px 0}
+    .follow-title{font-size:16px;font-weight:700;text-align:left;margin-bottom:14px;line-height:1.35}
+    .follow-title.center{text-align:center}
+    .edit-hint{font-size:14px;color:#1a2332;margin:-4px 0 10px;text-align:left}
+    .like-grid{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 18px}
+    .like-option{background:#fff;border:1px solid #247899;border-radius:8px;color:#3a84b8;text-align:center;padding:12px 14px;font-size:15px;font-weight:500}
+    .like-option:hover{background:#f7fbff}
+    .like-option.selected{background:#468fed;border-color:#e2b248;color:#fff;box-shadow:0 0 0 1px #e2b248 inset}
     .suggestion-box{background:#f8fafc;border:1px solid #d0d7de;border-radius:10px;padding:14px;margin:8px 0 14px}
     .suggestion-box textarea{border:0;background:transparent;padding:0;margin:0;min-height:130px;resize:none;color:#1a2332}
     .suggestion-box textarea:focus{border:0}
+    .customer-review-box{background:#fff;border-color:#73bd87;border-radius:8px;padding:16px}
+    .customer-review-box textarea{min-height:190px;font-size:14px;line-height:1.35}
     button.copy-btn{width:100%;background:#1a2332;color:#fff;border:0;padding:14px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background .15s;font-family:inherit}
+    body.customer-review-mode button.copy-btn{background:#4d8cf0}
+    body.customer-review-mode button.copy-btn:hover{background:#3779de}
     button.copy-btn:hover{background:#303c4f}
     @media (max-width:480px){
       body{padding:12px;align-items:flex-start}
@@ -87,6 +108,8 @@
       h1{font-size:21px}
       p.sub{margin-bottom:24px}
       .rating-grid{grid-template-columns:1fr 1fr}
+      body.customer-review-mode .rating-grid{grid-template-columns:1fr}
+      body.customer-review-mode .rating-emoji{width:132px;height:132px;font-size:72px}
       .brand-logo{margin-bottom:22px}
     }
   </style>
@@ -104,6 +127,9 @@
 
     <!-- View 1: Rating gate -->
     <div id="view-rating" class="view">
+      <div class="rating-top" id="customer-rating-top">
+        <a href="#" id="skip-helper-link" class="skip-link" target="_blank" rel="noopener">Skip</a>
+      </div>
       <div class="brand-logo" id="brand-logo">Local Hub</div>
       <h1 id="rating-question">Leave us friendly feedback on google maps, click below on one of the options to take you there!</h1>
       <p class="sub">Your opinion matters to us. Thank you for your feedback!</p>
@@ -124,6 +150,23 @@
           <span class="rating-emoji">🙁</span>
           <span class="rating-label">Bad</span>
         </button>
+      </div>
+      <div id="customer-followup" class="customer-followup">
+        <div class="customer-divider"></div>
+        <div class="step customer-step" id="customer-step-standout">
+          <h2 class="follow-title center">What did you like the most?</h2>
+          <div class="like-grid" id="standout-chips"></div>
+        </div>
+
+        <div class="step customer-step" id="customer-step-review">
+          <div class="customer-divider"></div>
+          <h3 class="follow-title">Would you be willing to leave a review on Google?</h3>
+          <p class="edit-hint">Tap it to make edits if you'd like.</p>
+          <div class="suggestion-box customer-review-box">
+            <textarea id="suggested-review"></textarea>
+          </div>
+          <button type="button" class="copy-btn" id="copy-open-review">Click to copy and go to Google</button>
+        </div>
       </div>
     </div>
 
@@ -181,35 +224,6 @@
       </form>
     </div>
 
-    <!-- View 2c: Existing customer review helper -->
-    <div id="view-customer" class="view">
-      <div class="customer-top">
-        <a class="back" data-customer-back>← Back</a>
-        <a href="#" id="skip-helper-link" class="skip-link" target="_blank" rel="noopener">Skip</a>
-      </div>
-      <div class="brand-logo">Local Hub</div>
-      <h1>Review helper</h1>
-      <p class="sub">Pick a few details, copy the review, then open Google Reviews.</p>
-
-      <div class="step customer-step visible" id="customer-step-service">
-        <div class="label">Service</div>
-        <div class="chip-grid" id="service-chips"></div>
-      </div>
-
-      <div class="step customer-step" id="customer-step-standout">
-        <div class="label">What stood out</div>
-        <div class="chip-grid" id="standout-chips"></div>
-      </div>
-
-      <div class="step customer-step" id="customer-step-review">
-        <div class="label">Suggested review</div>
-        <div class="suggestion-box">
-          <textarea id="suggested-review" readonly></textarea>
-        </div>
-        <button type="button" class="copy-btn" id="copy-open-review">Copy and open Google Reviews</button>
-      </div>
-    </div>
-
     <!-- View 3: Success -->
     <div id="view-success" class="view">
       <div class="success">
@@ -245,7 +259,6 @@
       rating:   document.getElementById('view-rating'),
       positive: document.getElementById('view-positive'),
       negative: document.getElementById('view-negative'),
-      customer: document.getElementById('view-customer'),
       success:  document.getElementById('view-success')
     };
     function show(name){
@@ -283,10 +296,13 @@
     });
 
     if (isCustomerMode) {
+      document.body.classList.add('customer-review-mode');
       document.getElementById('city-title').textContent = 'Choose your location';
       document.getElementById('city-sub').textContent = 'Select the Google profile for your review.';
-      document.getElementById('rating-question').textContent = 'How was your experience?';
-      document.querySelector('#view-rating .sub').textContent = 'Choose one option before leaving a Google review.';
+      document.getElementById('rating-question').textContent = 'How was your experience with Local Hub?';
+      document.querySelector('#view-rating .sub').textContent = 'Your opinion matters to us, thanks!';
+    } else {
+      document.getElementById('customer-rating-top').style.display = 'none';
     }
 
     if (cfg) {
@@ -321,7 +337,7 @@
         if (selectedRating === 'excellent' || selectedRating === 'good') {
           if (isCustomerMode) {
             resetCustomerHelper();
-            show('customer');
+            showCustomerFollowup();
           } else {
             applyPositiveCopy(selectedRating);
             show('positive');
@@ -336,40 +352,44 @@
       el.addEventListener('click', () => { selectedRating = null; show('rating'); });
     });
 
-    document.querySelectorAll('[data-customer-back]').forEach(el => {
-      el.addEventListener('click', () => { show('rating'); });
-    });
-
     const customerState = {
-      service: '',
-      standouts: new Set()
+      standout: ''
     };
-
-    const SERVICE_OPTIONS = [
-      'water damage',
-      'flood cleanup',
-      'mold or odor concern',
-      'biohazard cleanup',
-      'emergency service',
-      'other'
-    ];
 
     const STANDOUT_OPTIONS = [
       'fast response',
-      'professional team',
+      'professional',
       'clear communication',
       'careful cleanup',
-      'help with the process',
-      'good follow-up'
+      'friendly',
+      'Everything'
     ];
 
     const STANDOUT_COPY = {
-      'fast response': 'responded quickly',
-      'professional team': 'were professional',
-      'clear communication': 'communicated clearly',
-      'careful cleanup': 'handled the cleanup carefully',
-      'help with the process': 'helped with the process',
-      'good follow-up': 'followed up well'
+      'fast response': {
+        sentence: 'The team responded quickly and made it easy to get help when I needed it.',
+        top: 'fast response'
+      },
+      'professional': {
+        sentence: 'Everyone I dealt with was professional, respectful, and clear.',
+        top: 'professional service'
+      },
+      'clear communication': {
+        sentence: 'They explained the process clearly and kept communication simple.',
+        top: 'clear communication'
+      },
+      'careful cleanup': {
+        sentence: 'The cleanup was handled carefully and the team paid attention to the details.',
+        top: 'careful cleanup'
+      },
+      'friendly': {
+        sentence: 'The team was friendly, helpful, and easy to work with.',
+        top: 'friendly team'
+      },
+      'Everything': {
+        sentence: 'The response, communication, and overall service were all excellent.',
+        top: 'great overall service'
+      }
     };
 
     function buildChips(containerId, options, selected, onClick){
@@ -377,8 +397,9 @@
       options.forEach(option => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = selected(option) ? 'chip selected' : 'chip';
-        btn.textContent = option.replace(/\b\w/g, c => c.toUpperCase());
+        btn.className = selected(option) ? 'chip like-option selected' : 'chip like-option';
+        btn.textContent = option;
+        btn.dataset.label = option;
         btn.addEventListener('click', () => onClick(option, btn));
         container.appendChild(btn);
       });
@@ -387,46 +408,51 @@
     function updateSuggestedReview(){
       const textarea = document.getElementById('suggested-review');
       if (!textarea) return;
-      const service = customerState.service || 'emergency service';
-      const standouts = Array.from(customerState.standouts).map(item => STANDOUT_COPY[item] || item);
-      const standoutText = standouts.length
-        ? standouts.join(', ').replace(/, ([^,]*)$/, ' and $1')
-        : 'were helpful and professional';
-      textarea.value = `Great experience with the team. They helped with ${service}. They ${standoutText}. The process was clear, the team was responsive, and I would recommend them.`;
+      const standout = STANDOUT_COPY[customerState.standout] || STANDOUT_COPY.Everything;
+      textarea.value = `I had a great experience with the team. ${standout.sentence} Top 3 things I appreciated: 1) ${standout.top} 2) helpful support 3) a smooth process. I would recommend them to anyone who needs help.`;
     }
 
     function updateCustomerSteps(){
-      const hasService = Boolean(customerState.service);
-      const hasStandout = customerState.standouts.size > 0;
-      document.getElementById('customer-step-standout').classList.toggle('visible', hasService);
-      document.getElementById('customer-step-review').classList.toggle('visible', hasService && hasStandout);
-      if (hasService && hasStandout) updateSuggestedReview();
+      const hasStandout = Boolean(customerState.standout);
+      document.getElementById('customer-step-standout').classList.toggle('visible', true);
+      document.getElementById('customer-step-review').classList.toggle('visible', hasStandout);
+      if (hasStandout) updateSuggestedReview();
+    }
+
+    function showCustomerFollowup(){
+      const followup = document.getElementById('customer-followup');
+      followup.classList.add('visible');
+      updateCustomerSteps();
+      setTimeout(() => {
+        document.getElementById('customer-step-standout').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
     }
 
     function resetCustomerHelper(){
-      customerState.service = '';
-      customerState.standouts.clear();
-      document.querySelectorAll('#service-chips .chip, #standout-chips .chip').forEach(chip => chip.classList.remove('selected'));
+      customerState.standout = '';
+      document.getElementById('customer-followup').classList.remove('visible');
+      document.querySelectorAll('#standout-chips .chip').forEach(chip => {
+        chip.classList.remove('selected');
+        chip.textContent = chip.dataset.label || chip.textContent.replace(/^👍\s*/, '');
+      });
       document.getElementById('suggested-review').value = '';
       updateCustomerSteps();
     }
 
-    buildChips('service-chips', SERVICE_OPTIONS, option => option === customerState.service, (option, btn) => {
-      customerState.service = option;
-      document.querySelectorAll('#service-chips .chip').forEach(chip => chip.classList.remove('selected'));
+    buildChips('standout-chips', STANDOUT_OPTIONS, option => option === customerState.standout, (option, btn) => {
+      customerState.standout = option;
+      document.querySelectorAll('#standout-chips .chip').forEach(chip => {
+        chip.classList.remove('selected');
+        chip.textContent = chip.dataset.label || chip.textContent.replace(/^👍\s*/, '');
+      });
+      const label = btn.dataset.label || btn.textContent;
+      btn.dataset.label = label;
+      btn.textContent = `👍 ${label}`;
       btn.classList.add('selected');
       updateCustomerSteps();
-    });
-
-    buildChips('standout-chips', STANDOUT_OPTIONS, option => customerState.standouts.has(option), (option, btn) => {
-      if (customerState.standouts.has(option)) {
-        customerState.standouts.delete(option);
-        btn.classList.remove('selected');
-      } else {
-        customerState.standouts.add(option);
-        btn.classList.add('selected');
-      }
-      updateCustomerSteps();
+      setTimeout(() => {
+        document.getElementById('customer-step-review').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
     });
 
     updateCustomerSteps();
