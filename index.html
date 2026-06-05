@@ -369,7 +369,7 @@
     });
 
     const customerState = {
-      standout: ''
+      standouts: []
     };
 
     const STANDOUT_OPTIONS = [
@@ -381,32 +381,195 @@
       'Everything'
     ];
 
-    const STANDOUT_COPY = {
-      'efficient': {
-        sentence: 'The team was efficient, organized, and made the whole process simple.',
-        top: 'efficient service'
-      },
-      'professional': {
-        sentence: 'Everyone I dealt with was professional, respectful, and clear.',
-        top: 'professional service'
-      },
-      'affordable': {
-        sentence: 'The service was fair, clear, and worth the cost.',
-        top: 'fair pricing'
-      },
-      'timely': {
-        sentence: 'They arrived on time, worked quickly, and kept things moving.',
-        top: 'timely service'
-      },
-      'friendly': {
-        sentence: 'The team was friendly, helpful, and easy to work with.',
-        top: 'friendly team'
-      },
-      'Everything': {
-        sentence: 'The response, communication, and overall service were all excellent.',
-        top: 'great overall service'
-      }
+    const REVIEW_OPENERS = [
+      'I had a great experience with the team.',
+      'I was really happy with the service from start to finish.',
+      'My experience was very positive overall.',
+      'I appreciated how the whole service was handled.',
+      'This was a very good experience and I would use them again.',
+      'The team made the process easier than I expected.',
+      'I had a smooth experience and felt well taken care of.',
+      'I was impressed with the service and the way everything was managed.',
+      'The whole process felt clear and well handled.',
+      'I had a positive experience and appreciated the support.'
+    ];
+
+    const REVIEW_CLOSERS = [
+      'I would recommend them to anyone looking for reliable help.',
+      'I would be comfortable recommending them to others.',
+      'I would use this service again.',
+      'I am glad I chose them and would recommend the team.',
+      'Overall, it was a very solid experience.',
+      'They made the process much easier and I appreciated that.',
+      'I would definitely keep them in mind in the future.',
+      'Overall, I felt the service was worth recommending.',
+      'I appreciated the experience and would recommend them.',
+      'They did a good job and made everything feel manageable.'
+    ];
+
+    const REVIEW_PREFIXES = [
+      'Also,',
+      'I also appreciated that',
+      'Another thing I liked was that',
+      'On top of that,',
+      'It also helped that',
+      'I noticed that'
+    ];
+
+    const REVIEW_FIRST_PERSON_PREFIXES = [
+      'Also,',
+      'On top of that,'
+    ];
+
+    const REVIEW_FRAGMENTS = {
+      efficient: [
+        'they moved quickly without making the job feel rushed',
+        'the process was efficient from the first conversation to the follow-up',
+        'the team stayed organized and kept everything moving smoothly',
+        'they handled the work in a practical way and did not waste time',
+        'the whole appointment felt streamlined and easy to get through',
+        'they knew what needed to happen and got right to it',
+        'the work was done with a good pace and clear attention to detail',
+        'they made the process feel simple and well coordinated',
+        'every step felt organized, which made the service much easier',
+        'they were quick to respond and efficient once the work started',
+        'the team used the time well and kept the job on track',
+        'everything was handled in a direct and efficient way',
+        'the service felt smooth, organized, and easy to manage',
+        'they kept the process moving without cutting corners',
+        'the team worked with focus and made good use of the time',
+        'scheduling, communication, and the actual work all felt efficient',
+        'they made a stressful task feel much easier to handle',
+        'the job moved faster than I expected while still feeling careful',
+        'the team had a clear process and followed through on it',
+        'they took care of things efficiently and made the experience simple'
+      ],
+      professional: [
+        'everyone I dealt with was professional, respectful, and clear',
+        'the team communicated clearly and treated the situation seriously',
+        'they were respectful, organized, and easy to trust',
+        'the service felt professional from beginning to end',
+        'they explained what was happening and followed through on what they said',
+        'the team showed up prepared and handled everything properly',
+        'communication was clear, calm, and professional',
+        'they were careful with the details and respectful throughout the process',
+        'the team made a strong impression with how they handled the job',
+        'they were dependable and professional in every interaction',
+        'I felt like the work was being handled by people who knew what they were doing',
+        'they kept things clear and made the process feel organized',
+        'the team was polite, focused, and professional',
+        'they answered questions clearly and made the next steps easy to understand',
+        'the whole experience felt well managed and professional',
+        'they were thoughtful about the work and respectful of my time',
+        'the team handled the service with care and professionalism',
+        'I appreciated their clear communication and professional attitude',
+        'they made sure everything was handled the right way',
+        'the team was reliable, respectful, and easy to work with'
+      ],
+      affordable: [
+        'the service felt fair and worth the cost',
+        'the pricing was reasonable for the level of service provided',
+        'I felt like I received good value for the work',
+        'the cost felt fair based on how the job was handled',
+        'the service was clear, practical, and worth it',
+        'the value was strong compared with the amount of help provided',
+        'I appreciated that the price felt reasonable and transparent',
+        'the service felt like a fair investment for the result',
+        'the work was handled well without feeling overpriced',
+        'the overall value made the experience even better',
+        'the price made sense for the quality of service',
+        'I felt comfortable with the value I received',
+        'the service was affordable without feeling rushed or basic',
+        'they delivered good value and made the process worthwhile',
+        'the cost felt honest and the service matched it',
+        'I appreciated getting solid service at a fair price',
+        'the pricing felt straightforward and reasonable',
+        'the service felt balanced between quality and cost',
+        'I felt like the result justified the price',
+        'they provided helpful service at a price that felt fair'
+      ],
+      timely: [
+        'they arrived when expected and kept the schedule on track',
+        'the timing was handled well and there were no unnecessary delays',
+        'they responded quickly and kept things moving',
+        'the team was punctual and respectful of my time',
+        'everything happened within the timeframe I was expecting',
+        'they made scheduling easy and followed through on the timing',
+        'the service was prompt without feeling rushed',
+        'they kept me updated and handled the timing well',
+        'the team showed up on time and got started right away',
+        'the response time was strong and made a big difference',
+        'they worked at a good pace and did not drag the process out',
+        'the appointment felt well timed and easy to fit into the day',
+        'they respected the schedule and kept the process moving',
+        'the work was completed in a timely way',
+        'they made sure the timing stayed clear from start to finish',
+        'the team was quick to act and easy to coordinate with',
+        'they followed the schedule and avoided surprises',
+        'the timing was one of the best parts of the experience',
+        'they were prompt, prepared, and ready to help',
+        'the service moved quickly once everything was set up'
+      ],
+      friendly: [
+        'the team was friendly, helpful, and easy to talk to',
+        'everyone was kind and made the experience feel less stressful',
+        'the people I worked with were patient and approachable',
+        'they were easy to communicate with and made me feel comfortable',
+        'the team had a helpful attitude throughout the process',
+        'they were friendly while still staying focused on the work',
+        'the service felt personal and easygoing',
+        'I appreciated how kind and helpful everyone was',
+        'the team was pleasant to work with from start to finish',
+        'they made the process feel more comfortable',
+        'the friendly communication made a real difference',
+        'they were polite, helpful, and easy to deal with',
+        'I felt respected and supported during the service',
+        'the team was warm, responsive, and patient',
+        'they made it easy to ask questions and understand the process',
+        'the people involved were genuinely helpful',
+        'I appreciated the positive attitude from the team',
+        'they were friendly without being pushy',
+        'the team made a good impression with how they treated me',
+        'they were kind, clear, and easy to work with'
+      ],
+      Everything: [
+        'the whole experience was smooth, professional, and easy',
+        'the response, communication, timing, and service all worked well together',
+        'everything was handled clearly from start to finish',
+        'the team did a good job across the full process',
+        'I appreciated the overall service and the way everything came together',
+        'the team made the full experience feel simple and well managed',
+        'the service was strong in every part that mattered',
+        'the whole process felt organized, friendly, and professional',
+        'everything about the experience felt reliable',
+        'the team handled the details well and made the service easy',
+        'the communication, timing, and work quality were all solid',
+        'the overall experience was exactly what I hoped for',
+        'the service felt complete and well coordinated',
+        'the team made a positive impression from beginning to end',
+        'I liked the full experience, not just one part of it',
+        'the service was clear, helpful, and easy to recommend',
+        'everything felt taken care of in a professional way',
+        'the overall process was smooth and reassuring',
+        'the team followed through and made the experience positive',
+        'the whole service was handled with care'
+      ]
     };
+
+    function randomFrom(list){
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function capitalize(text){
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    function buildReviewSentence(fragment, index){
+      const clean = fragment.replace(/\.$/, '');
+      if (index === 0) return `${capitalize(clean)}.`;
+      const prefixes = /^I\b/.test(clean) ? REVIEW_FIRST_PERSON_PREFIXES : REVIEW_PREFIXES;
+      return `${randomFrom(prefixes)} ${clean}.`;
+    }
 
     function buildChips(containerId, options, selected, onClick){
       const container = document.getElementById(containerId);
@@ -424,12 +587,16 @@
     function updateSuggestedReview(){
       const textarea = document.getElementById('suggested-review');
       if (!textarea) return;
-      const standout = STANDOUT_COPY[customerState.standout] || STANDOUT_COPY.Everything;
-      textarea.value = `I had a great experience with the team. ${standout.sentence} Top 3 things I appreciated: 1) ${standout.top} 2) helpful support 3) a smooth process. I would recommend them to anyone who needs help.`;
+      const selected = customerState.standouts.length ? customerState.standouts : ['Everything'];
+      const details = selected.map((option, index) => {
+        const fragments = REVIEW_FRAGMENTS[option] || REVIEW_FRAGMENTS.Everything;
+        return buildReviewSentence(randomFrom(fragments), index);
+      });
+      textarea.value = `${randomFrom(REVIEW_OPENERS)} ${details.join(' ')} ${randomFrom(REVIEW_CLOSERS)}`;
     }
 
     function updateCustomerSteps(){
-      const hasStandout = Boolean(customerState.standout);
+      const hasStandout = customerState.standouts.length > 0;
       document.getElementById('customer-step-standout').classList.toggle('visible', true);
       document.getElementById('customer-step-review').classList.toggle('visible', hasStandout);
       if (hasStandout) updateSuggestedReview();
@@ -445,7 +612,7 @@
     }
 
     function resetCustomerHelper(){
-      customerState.standout = '';
+      customerState.standouts = [];
       document.getElementById('customer-followup').classList.remove('visible');
       document.querySelectorAll('#standout-chips .chip').forEach(chip => {
         chip.classList.remove('selected');
@@ -455,20 +622,31 @@
       updateCustomerSteps();
     }
 
-    buildChips('standout-chips', STANDOUT_OPTIONS, option => option === customerState.standout, (option, btn) => {
-      customerState.standout = option;
+    function refreshStandoutChips(){
       document.querySelectorAll('#standout-chips .chip').forEach(chip => {
-        chip.classList.remove('selected');
-        chip.textContent = chip.dataset.label || chip.textContent.replace(/^👍\s*/, '');
+        const label = chip.dataset.label || chip.textContent.replace(/^👍\s*/, '');
+        chip.dataset.label = label;
+        const selected = customerState.standouts.includes(label);
+        chip.classList.toggle('selected', selected);
+        chip.textContent = selected ? `👍 ${label}` : label;
       });
-      const label = btn.dataset.label || btn.textContent;
-      btn.dataset.label = label;
-      btn.textContent = `👍 ${label}`;
-      btn.classList.add('selected');
+    }
+
+    buildChips('standout-chips', STANDOUT_OPTIONS, option => customerState.standouts.includes(option), (option) => {
+      const hasOption = customerState.standouts.includes(option);
+      if (option === 'Everything') {
+        customerState.standouts = hasOption ? [] : ['Everything'];
+      } else {
+        const withoutEverything = customerState.standouts.filter(item => item !== 'Everything');
+        customerState.standouts = hasOption ? withoutEverything.filter(item => item !== option) : [...withoutEverything, option];
+      }
+      refreshStandoutChips();
       updateCustomerSteps();
-      setTimeout(() => {
-        document.getElementById('customer-step-review').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 0);
+      if (customerState.standouts.length) {
+        setTimeout(() => {
+          document.getElementById('customer-step-review').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 0);
+      }
     });
 
     updateCustomerSteps();
