@@ -30,6 +30,7 @@
     .card{max-width:520px;width:100%;min-width:0;background:#fff;border-radius:16px;padding:40px 32px;box-shadow:0 4px 24px rgba(0,0,0,.25)}
     .brand-logo{display:flex;align-items:center;justify-content:center;background:#566c84;color:#fff;font-weight:700;font-size:18px;padding:14px 24px;border-radius:6px;margin:0 auto 28px;max-width:fit-content;letter-spacing:.5px}
     h1{font-size:22px;text-align:center;margin-bottom:8px;line-height:1.35;font-weight:700}
+    body.customer-review-mode h1{overflow-wrap:anywhere}
     p.sub{color:#5a6878;text-align:center;font-size:14px;margin-bottom:32px}
     .rating-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px}
     .rating-btn{background:#f5f7fa;border:0;border-radius:12px;padding:24px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;transition:all .15s;font-family:inherit}
@@ -42,6 +43,13 @@
     body.customer-review-mode .rating-btn:hover{background:transparent;transform:none}
     body.customer-review-mode .rating-emoji{display:flex;align-items:center;justify-content:center;width:152px;height:152px;background:#f5f7fa;border-radius:10px;font-size:82px;box-shadow:0 1px 2px rgba(0,0,0,.02)}
     body.customer-review-mode .rating-label{font-size:18px}
+    @media (min-width:720px){
+      body.customer-review-mode .card{max-width:760px;padding:40px 36px}
+      body.customer-review-mode .rating-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;max-width:none;margin:10px 0 0}
+      body.customer-review-mode .rating-emoji{width:100%;height:auto;aspect-ratio:1;max-width:136px;font-size:72px}
+      body.customer-review-mode .rating-label{font-size:15px}
+      body.customer-review-mode .customer-followup{max-width:540px;margin-left:auto;margin-right:auto}
+    }
     .step{margin-bottom:22px}
     .label{font-weight:600;font-size:12px;color:#1a73e8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
     .btn-link{display:block;background:#1a73e8;color:#fff;text-decoration:none;text-align:center;padding:14px 16px;border-radius:8px;font-weight:600;transition:background .15s}
