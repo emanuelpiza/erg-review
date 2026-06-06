@@ -251,22 +251,37 @@
 
   </div>
 
+  <script src="profiles.js"></script>
   <script>
-    // Per-city brand + Google review URL. Display label is the city name.
-    // Add cities here as Dan delivers brand + GBP URL for each.
-    const CITY_CONFIG = {
-      'ottawa':  { label: 'Ottawa, ON',   brand: 'Maximum Restore Solutions',       reviewUrl: 'https://maps.app.goo.gl/w83Pz6X9325vQkxc7' },
-      'toronto': { label: 'Toronto, ON',  brand: 'Downtown Emergency John Plumber', reviewUrl: 'https://maps.app.goo.gl/CzVN6vMH4VQXycTj8' },
-      'calgary': { label: 'Calgary, AB',  brand: 'IDEAL Response',                  reviewUrl: 'https://share.google/xWKPY1jCNPxQllJPC' }
+    const PROFILE_CONFIG = window.PROFILE_CONFIG || {};
+    const LEGACY_CITY_CONFIG = {
+      'ottawa':  { label: 'Ottawa, ON',   brand: 'Maximum Restore Solutions',       city: 'Ottawa',  reviewUrl: 'https://maps.app.goo.gl/w83Pz6X9325vQkxc7', giftEligible: true },
+      'toronto': { label: 'Toronto, ON',  brand: 'Downtown Emergency John Plumber', city: 'Toronto', reviewUrl: 'https://maps.app.goo.gl/CzVN6vMH4VQXycTj8', giftEligible: false },
+      'calgary': { label: 'Calgary, AB',  brand: 'IDEAL Response',                  city: 'Calgary', reviewUrl: 'https://share.google/xWKPY1jCNPxQllJPC', giftEligible: false }
     };
 
     const params = new URLSearchParams(location.search);
+    const profileParam = (params.get('p') || params.get('profile') || '').toLowerCase();
     const cityParam = (params.get('city') || '').toLowerCase();
     const modeParam = (params.get('mode') || '').toLowerCase();
     const pathMode = location.pathname.replace(/\/+$/, '').split('/').pop();
-    const isCustomerMode = ['customer', 'customers', 'existing', 'review'].includes(modeParam) || pathMode === 'review';
-    let selectedCity = cityParam;
-    let cfg = CITY_CONFIG[cityParam] || null;
+    const requestedGiftMode = ['gift', 'gift-card', 'giftcard', 'normal'].includes(modeParam);
+    let selectedCity = cityParam || profileParam;
+    let selectedKey = profileParam || cityParam;
+    let linkType = null;
+    let cfg = null;
+    if (profileParam && PROFILE_CONFIG[profileParam]) {
+      cfg = { ...PROFILE_CONFIG[profileParam], giftEligible: false };
+      linkType = 'profile';
+    } else if (cityParam && LEGACY_CITY_CONFIG[cityParam]) {
+      cfg = LEGACY_CITY_CONFIG[cityParam];
+      linkType = 'city';
+    }
+    let isCustomerMode = ['customer', 'customers', 'existing', 'review'].includes(modeParam) || pathMode === 'review';
+    if (linkType === 'profile') isCustomerMode = true;
+    if (linkType === 'city' && cfg && !cfg.giftEligible) isCustomerMode = true;
+    if (requestedGiftMode && cfg && cfg.giftEligible) isCustomerMode = false;
+    if (requestedGiftMode && cfg && !cfg.giftEligible) isCustomerMode = true;
 
     const SUBMIT_URL = 'https://n8n.fifthstar.io/webhook/erg-giftogram-submit';
 
@@ -283,38 +298,38 @@
       window.scrollTo(0,0);
     }
 
-    function applyCity(slug){
-      selectedCity = slug;
-      cfg = CITY_CONFIG[slug];
+    function applyConfig(){
+      selectedCity = cfg.city || cfg.label || selectedKey;
       // Brand shown to user is always "Local Hub", not the per-city brand.
-      // Per-city brand is used in backend notifications only (and as the Google review target via reviewUrl).
+      // Profile brand is used in backend notifications only and as the Google review target.
       document.getElementById('review-link').href = cfg.reviewUrl;
       document.getElementById('skip-helper-link').href = cfg.reviewUrl;
-      // Reflect choice in URL without reloading, so refresh keeps the city
+      // Reflect choice in URL without reloading, so refresh keeps the same target.
       const url = new URL(location.href);
-      url.searchParams.set('city', slug);
+      if (linkType === 'profile') {
+        url.searchParams.set('p', selectedKey);
+        url.searchParams.delete('profile');
+        url.searchParams.delete('city');
+      } else {
+        url.searchParams.set('city', selectedKey);
+        url.searchParams.delete('p');
+        url.searchParams.delete('profile');
+      }
       if (isCustomerMode) url.searchParams.set('mode', 'customer');
+      if (!isCustomerMode) url.searchParams.delete('mode');
       history.replaceState(null, '', url.toString());
     }
 
-    // Build city picker grid
     const grid = document.getElementById('city-grid');
-    Object.entries(CITY_CONFIG).forEach(([slug, info]) => {
-      const btn = document.createElement('button');
-      btn.className = 'city-btn';
-      btn.type = 'button';
-      btn.innerHTML = `<span>${info.label}</span><span class="city-arrow">→</span>`;
-      btn.addEventListener('click', () => {
-        applyCity(slug);
-        show('rating');
-      });
-      grid.appendChild(btn);
-    });
+    function showInvalidLink(){
+      grid.innerHTML = '';
+      document.getElementById('city-title').textContent = 'Review link not found';
+      document.getElementById('city-sub').textContent = 'Please use the location link sent by our team.';
+      show('city');
+    }
 
     if (isCustomerMode) {
       document.body.classList.add('customer-review-mode');
-      document.getElementById('city-title').textContent = 'Choose your location';
-      document.getElementById('city-sub').textContent = 'Select the Google profile for your review.';
       document.getElementById('rating-question').textContent = 'How was your experience with Local Hub?';
       document.querySelector('#view-rating .sub').textContent = 'Your opinion matters to us, thanks!';
     } else {
@@ -322,12 +337,10 @@
     }
 
     if (cfg) {
-      // City came from URL param: skip picker, go straight to rating
-      applyCity(cityParam);
+      applyConfig();
       show('rating');
     } else {
-      // No valid city: show picker
-      show('city');
+      showInvalidLink();
     }
 
     let selectedRating = null;
