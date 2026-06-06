@@ -264,21 +264,26 @@
     const profileParam = (params.get('p') || params.get('profile') || '').toLowerCase();
     const cityParam = (params.get('city') || '').toLowerCase();
     const modeParam = (params.get('mode') || '').toLowerCase();
+    const customerParam = (params.get('c') || params.get('customer') || '').toLowerCase();
     const pathMode = location.pathname.replace(/\/+$/, '').split('/').pop();
-    const requestedGiftMode = ['gift', 'gift-card', 'giftcard', 'normal'].includes(modeParam);
+    const customerNoValues = ['no', 'n', 'false', '0', 'not-customer', 'non-customer', 'noncustomer'];
+    const customerYesValues = ['yes', 'y', 'true', '1', 'customer'];
+    const requestedGiftMode = ['gift', 'gift-card', 'giftcard', 'normal', 'not-customer', 'non-customer', 'noncustomer'].includes(modeParam);
+    const requestedNonCustomerMode = customerNoValues.includes(customerParam) || requestedGiftMode;
+    const requestedCustomerMode = customerYesValues.includes(customerParam) || ['customer', 'customers', 'existing', 'review'].includes(modeParam) || pathMode === 'review';
     let selectedCity = cityParam || profileParam;
     let selectedKey = profileParam || cityParam;
     let linkType = null;
     let cfg = null;
     if (profileParam && PROFILE_CONFIG[profileParam]) {
-      cfg = { ...PROFILE_CONFIG[profileParam], giftEligible: false };
+      cfg = { ...PROFILE_CONFIG[profileParam], giftEligible: true };
       linkType = 'profile';
     } else if (cityParam && LEGACY_CITY_CONFIG[cityParam]) {
       cfg = LEGACY_CITY_CONFIG[cityParam];
       linkType = 'city';
     }
-    let isCustomerMode = ['customer', 'customers', 'existing', 'review'].includes(modeParam) || pathMode === 'review';
-    if (linkType === 'profile') isCustomerMode = true;
+    let isCustomerMode = requestedCustomerMode;
+    if (linkType === 'profile') isCustomerMode = !requestedNonCustomerMode;
     if (linkType === 'city' && cfg && !cfg.giftEligible) isCustomerMode = true;
     if (requestedGiftMode && cfg && cfg.giftEligible) isCustomerMode = false;
     if (requestedGiftMode && cfg && !cfg.giftEligible) isCustomerMode = true;
@@ -315,8 +320,14 @@
         url.searchParams.delete('p');
         url.searchParams.delete('profile');
       }
-      if (isCustomerMode) url.searchParams.set('mode', 'customer');
-      if (!isCustomerMode) url.searchParams.delete('mode');
+      url.searchParams.delete('mode');
+      url.searchParams.delete('customer');
+      url.searchParams.delete('c');
+      if (linkType === 'profile') {
+        if (!isCustomerMode) url.searchParams.set('c', 'no');
+      } else if (isCustomerMode) {
+        url.searchParams.set('mode', 'customer');
+      }
       history.replaceState(null, '', url.toString());
     }
 
