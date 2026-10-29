@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Hub — Thank you</title>
+  <meta name="robots" content="noindex">
+
+  <!-- TODO: Meta Pixel — leave disabled for Mark's clean review base.
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', 'YOUR_PIXEL_ID');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1"
+  /></noscript>
+  -->
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{width:100%;overflow-x:hidden}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:#0b1d3a;color:#1a2332;line-height:1.5;min-height:100vh;
+      width:100%;display:flex;align-items:center;justify-content:center;
+      padding:20px;overflow-x:hidden;
+    }
+    .card{
+      max-width:520px;width:100%;min-width:0;background:#fff;
+      border-radius:16px;padding:40px 32px;
+      box-shadow:0 4px 24px rgba(0,0,0,.25);
+    }
+    .brand-logo{
+      display:flex;align-items:center;justify-content:center;
+      background:#566c84;color:#fff;font-weight:700;font-size:18px;
+      padding:14px 24px;border-radius:6px;margin:0 auto 28px;
+      max-width:fit-content;letter-spacing:.5px;
+    }
+    h1{font-size:22px;text-align:center;margin-bottom:8px;line-height:1.35;font-weight:700}
+    p.sub{color:#5a6878;text-align:center;font-size:14px;margin-bottom:28px}
+    .view{display:none}
+    .view.active{display:block}
+    .back{
+      display:inline-block;color:#5a6878;font-size:13px;margin-bottom:16px;
+      cursor:pointer;text-decoration:none;
+    }
+    .back:hover{color:#1a73e8}
+    .btn-primary{
+      display:block;width:100%;background:#1a73e8;color:#fff;border:0;
+      padding:14px 16px;border-radius:8px;font-size:16px;font-weight:600;
+      cursor:pointer;font-family:inherit;text-align:center;text-decoration:none;
+      transition:background .15s;
+    }
+    .btn-primary:hover{background:#1557b0}
+    .btn-link{
+      display:block;background:#1a73e8;color:#fff;text-decoration:none;
+      text-align:center;padding:14px 16px;border-radius:8px;font-weight:600;
+      transition:background .15s;
+    }
+    .btn-link:hover{background:#1557b0}
+    button.submit{
+      width:100%;background:#34a853;color:#fff;border:0;padding:14px;
+      border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;
+      transition:background .15s;font-family:inherit;
+    }
+    button.submit:hover{background:#2c8e44}
+    button.submit:disabled{background:#9aa5b1;cursor:not-allowed}
+    button.submit.negative{background:#1a73e8}
+    button.submit.negative:hover{background:#1557b0}
+    button.submit.skip{
+      background:#fff;color:#5a6878;border:1px solid #d0d7de;margin-top:10px;
+    }
+    button.submit.skip:hover{background:#f5f7fa;color:#1a2332}
+    .step{margin-bottom:22px}
+    .label{
+      font-weight:600;font-size:12px;color:#1a73e8;text-transform:uppercase;
+      letter-spacing:.5px;margin-bottom:8px;
+    }
+    label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#1a2332}
+    input[type=text],input[type=email],input[type=tel],input[type=file],textarea{
+      width:100%;padding:12px;border:1px solid #d0d7de;border-radius:8px;
+      font-size:16px;margin-bottom:16px;transition:border .15s;font-family:inherit;
+    }
+    input[type=file]{background:#f8fafc;font-size:14px}
+    textarea{min-height:90px;resize:vertical}
+    input:focus,textarea:focus{outline:none;border-color:#1a73e8}
+    .error{color:#d93025;font-size:13px;margin-top:-8px;margin-bottom:12px;display:none}
+    .error.show{display:block}
+    .helper{color:#5a6878;font-size:12px;margin:-8px 0 14px}
+    .confirm-note{
+      background:#eef6ff;border:1px solid #cfe3ff;color:#244563;
+      border-radius:8px;padding:12px;font-size:13px;margin-bottom:16px;
+    }
+    .payment-note{
+      background:#f8fafc;border:1px solid #e5e9ef;color:#5a6878;
+      border-radius:8px;padding:12px;font-size:12px;margin-bottom:16px;
+    }
+    .success{text-align:center;padding:18px 0}
+    .success-icon{font-size:48px;margin-bottom:12px;color:#34a853}
+    .rating-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px}
+    .rating-btn{
+      background:#f5f7fa;border:0;border-radius:12px;padding:24px 8px;
+      cursor:pointer;display:flex;flex-direction:column;align-items:center;
+      gap:10px;transition:all .15s;font-family:inherit;
+    }
+    .rating-btn:hover{background:#e8ecf2;transform:translateY(-2px)}
+    .rating-emoji{font-size:48px;line-height:1}
+    .rating-label{font-size:13px;font-weight:700;color:#1a2332}
+    .search-wrap{position:relative;margin-bottom:12px}
+    .search-wrap input{margin-bottom:0}
+    .city-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px;max-height:340px;overflow-y:auto}
+    @media (min-width:480px){.city-grid{grid-template-columns:1fr}}
+    .city-btn{
+      background:#f5f7fa;border:0;border-radius:12px;padding:16px 14px;
+      cursor:pointer;font-family:inherit;font-size:15px;font-weight:600;
+      color:#1a2332;text-align:left;transition:all .15s;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+    }
+    .city-btn:hover{background:#e8ecf2;transform:translateY(-1px)}
+    .city-btn .meta{font-size:12px;font-weight:500;color:#5a6878;display:block;margin-top:2px}
+    .city-arrow{color:#1a73e8;font-size:18px;flex-shrink:0}
+    .empty-hint{color:#5a6878;font-size:13px;text-align:center;padding:16px 8px}
+    .selected-city{
+      background:#f5f7fa;border-radius:8px;padding:10px 12px;font-size:13px;
+      color:#5a6878;margin-bottom:16px;text-align:center;
+    }
+    .selected-city strong{color:#1a2332}
+    .stub-badge{
+      display:inline-block;background:#fff3cd;color:#856404;font-size:11px;
+      font-weight:700;padding:3px 8px;border-radius:4px;margin-bottom:10px;
+      text-transform:uppercase;letter-spacing:.4px;
+    }
+    @media (max-width:480px){
+      body{padding:12px;align-items:flex-start}
+      .card{padding:28px 20px;border-radius:12px}
+      h1{font-size:21px}
+      p.sub{margin-bottom:24px}
+      .rating-grid{grid-template-columns:1fr 1fr}
+      .brand-logo{margin-bottom:22px}
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- 1. Welcome (SMS entry) -->
+    <div id="view-welcome" class="view active">
+      <div class="brand-logo">Local Hub</div>
+      <h1>Thank you for using our services.</h1>
+      <p class="sub">
+        Emergency Response Group Inc / Local Hub received your request.
+        Please continue so we can route your feedback to the right team.
+      </p>
+      <button type="button" class="btn-primary" id="btn-continue">Continue</button>
+    </div>
+
+    <!-- 2. City search + filtered buttons -->
+    <div id="view-city" class="view">
+      <a class="back" data-back="welcome">← Back</a>
+      <div class="brand-logo">Local Hub</div>
+      <h1>Where are you located?</h1>
+      <p class="sub">Type your city to find the right review page. Matches appear as you type.</p>
+      <div class="search-wrap">
+        <label for="city-search">Search city or brand</label>
+        <input type="text" id="city-search" placeholder="Start typing your city…" autocomplete="off">
+      </div>
+      <div class="city-grid" id="city-grid"></div>
+      <p class="helper" id="city-hint">No full list is shown — search to continue.</p>
+    </div>
+
+    <!-- 3. Rating -->
+    <div id="view-rating" class="view">
+      <a class="back" data-back="city">← Back</a>
+      <div class="brand-logo">Local Hub</div>
+      <div class="selected-city" id="rating-city-label"></div>
+      <h1>How was your experience?</h1>
+      <p class="sub">Your opinion matters to us. Thank you for your feedback!</p>
+      <div class="rating-grid">
+        <button class="rating-btn" data-rating="excellent" aria-label="Excellent">
+          <span class="rating-emoji">😀</span>
+          <span class="rating-label">Excellent</span>
+        </button>
+        <button class="rating-btn" data-rating="good" aria-label="Good">
+          <span class="rating-emoji">🙂</span>
+          <span class="rating-label">Good</span>
+        </button>
+        <button class="rating-btn" data-rating="ok" aria-label="OK">
+          <span class="rating-emoji">😐</span>
+          <span class="rating-label">OK</span>
+        </button>
+        <button class="rating-btn" data-rating="bad" aria-label="Bad">
+          <span class="rating-emoji">🙁</span>
+          <span class="rating-label">Bad</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 4a. Positive path -->
+    <div id="view-positive" class="view">
+      <a class="back" data-back="rating">← Back</a>
+      <div class="brand-logo">Local Hub</div>
+      <h1 id="positive-title">Thanks for the kind words</h1>
+      <p class="sub">Two quick steps. Takes about a minute.</p>
+
+      <div class="step">
+        <div class="label">Step 1: leave a Google review</div>
+        <a href="#" id="review-link" class="btn-link" target="_blank" rel="noopener">Open Google Reviews</a>
+      </div>
+
+      <div class="step">
+        <div class="label">Step 2: confirm (optional thank-you)</div>
+        <form id="form-positive" novalidate>
+          <label for="p-name">Your name</label>
+          <input type="text" id="p-name" name="name" autocomplete="name" required>
+
+          <label for="p-email">Email</label>
+          <input type="email" id="p-email" name="email" autocomplete="email" placeholder="you@example.com" required>
+          <div class="error" id="p-email-error">Please enter a valid email</div>
+
+          <label for="p-screenshot">Review screenshot</label>
+          <input type="file" id="p-screenshot" name="screenshot" accept="image/*">
+          <p class="helper">Upload a screenshot after submitting the Google review (optional but helpful).</p>
+
+          <div class="confirm-note">
+            As an optional thank-you, we may send a small gift after our team confirms your review.
+            No hard sell — skip anytime.
+          </div>
+
+          <div class="payment-note">
+            Payment details are collected on this page, not by SMS.
+          </div>
+
+          <button type="submit" class="submit" id="p-submit">Continue to thank-you details</button>
+          <button type="button" class="submit skip" id="p-skip-payment">Skip thank-you — I'm done</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 4a2. Payment stub (positive path only) -->
+    <div id="view-payment" class="view">
+      <a class="back" data-back="positive">← Back</a>
+      <div class="brand-logo">Local Hub</div>
+      <span class="stub-badge">Stub — no real charge</span>
+      <h1>Optional thank-you details</h1>
+      <p class="sub">This step is a placeholder for Mark. Nothing is charged or sent.</p>
+
+      <form id="form-payment" novalidate>
+        <label for="pay-method">Preferred delivery</label>
+        <input type="text" id="pay-method" name="method" placeholder="e.g. email gift, skip" value="Email (stub)">
+
+        <label for="pay-contact">Confirm email for thank-you</label>
+        <input type="email" id="pay-contact" name="payContact" placeholder="you@example.com">
+
+        <div class="payment-note">
+          Payment details are collected on this page, not by SMS.
+          Real payment processing is not wired in this base build.
+        </div>
+
+        <button type="submit" class="submit" id="pay-submit">Submit (stub)</button>
+        <button type="button" class="submit skip" id="pay-skip">Skip</button>
+      </form>
+    </div>
+
+    <!-- 4b. Negative / OK path -->
+    <div id="view-negative" class="view">
+      <a class="back" data-back="rating">← Back</a>
+      <div class="brand-logo">Local Hub</div>
+      <h1>We're sorry. Help us do better</h1>
+      <p class="sub">Tell us what went wrong. The owner reads every message.</p>
+
+      <form id="form-negative" novalidate>
+        <label for="n-name">Your name</label>
+        <input type="text" id="n-name" name="name" autocomplete="name" required>
+
+        <label for="n-contact">Email or phone</label>
+        <input type="text" id="n-contact" name="contact" autocomplete="email" placeholder="you@example.com or +1..." required>
+        <div class="error" id="n-error">Please enter a valid email or phone</div>
+
+        <label for="n-comment">What went wrong</label>
+        <textarea id="n-comment" name="comment" required placeholder="A few sentences help us improve…"></textarea>
+
+        <button type="submit" class="submit negative" id="n-submit">Send feedback</button>
+      </form>
+    </div>
+
+    <!-- 5. Success -->
+    <div id="view-success" class="view">
+      <div class="success">
+        <div class="success-icon">✓</div>
+        <h1 id="success-title">Thank you</h1>
+        <p class="sub" id="success-msg">We appreciate your time.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="profiles.js"></script>
+  <script>
+    (function () {
+      const PROFILE_CONFIG = window.PROFILE_CONFIG || {};
+      const profiles = Object.keys(PROFILE_CONFIG).map(function (key) {
+        return Object.assign({ key: key }, PROFILE_CONFIG[key]);
+      });
+
+      const state = {
+        profileKey: null,
+        cfg: null,
+        rating: null,
+        positive: { name: '', email: '', screenshotName: '' }
+      };
+
+      const views = {
+        welcome: document.getElementById('view-welcome'),
+        city: document.getElementById('view-city'),
+        rating: document.getElementById('view-rating'),
+        positive: document.getElementById('view-positive'),
+        payment: document.getElementById('view-payment'),
+        negative: document.getElementById('view-negative'),
+        success: document.getElementById('view-success')
+      };
+
+      function show(name) {
+        Object.keys(views).forEach(function (k) {
+          views[k].classList.toggle('active', k === name);
+        });
+        window.scrollTo(0, 0);
+      }
+
+      function validEmail(v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      }
+
+      function validContact(v) {
+        return validEmail(v) || /^\+?[\d\s\-().]{7,}$/.test(v);
+      }
+
+      // Deep-link: ?p=profileKey skips welcome → city and goes to rating
+      const params = new URLSearchParams(location.search);
+      const profileParam = (params.get('p') || params.get('profile') || '').toLowerCase();
+      if (profileParam && PROFILE_CONFIG[profileParam]) {
+        selectProfile(profileParam);
+        show('rating');
+      }
+
+      document.getElementById('btn-continue').addEventListener('click', function () {
+        renderCityList('');
+        show('city');
+        document.getElementById('city-search').focus();
+      });
+
+      document.querySelectorAll('[data-back]').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+          e.preventDefault();
+          show(el.getAttribute('data-back'));
+        });
+      });
+
+      function selectProfile(key) {
+        state.profileKey = key;
+        state.cfg = PROFILE_CONFIG[key];
+        const label = state.cfg.label || state.cfg.city || key;
+        const brand = state.cfg.brand || '';
+        document.getElementById('rating-city-label').innerHTML =
+          'Routing to <strong>' + escapeHtml(label) + '</strong>' +
+          (brand ? ' · ' + escapeHtml(brand) : '');
+        const reviewLink = document.getElementById('review-link');
+        reviewLink.href = state.cfg.reviewUrl || '#';
+        // Reflect in URL without reload
+        const url = new URL(location.href);
+        url.searchParams.set('p', key);
+        history.replaceState(null, '', url.toString());
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function filterProfiles(q) {
+        const needle = (q || '').trim().toLowerCase();
+        if (needle.length < 2) return [];
+        return profiles.filter(function (p) {
+          const hay = [p.label, p.city, p.state, p.country, p.brand, p.key]
+            .filter(Boolean).join(' ').toLowerCase();
+          return hay.indexOf(needle) !== -1;
+        }).slice(0, 12);
+      }
+
+      function renderCityList(q) {
+        const grid = document.getElementById('city-grid');
+        const hint = document.getElementById('city-hint');
+        const needle = (q || '').trim();
+        const matches = filterProfiles(q);
+        grid.innerHTML = '';
+        if (hint) {
+          if (needle.length < 2) {
+            hint.style.display = 'block';
+            hint.textContent = 'Type at least 2 characters to see matches. The full city list stays hidden.';
+          } else {
+            hint.style.display = 'none';
+          }
+        }
+        if (needle.length < 2) return;
+        if (!matches.length) {
+          const empty = document.createElement('div');
+          empty.className = 'empty-hint';
+          empty.textContent = 'No matches. Try another city or brand name.';
+          grid.appendChild(empty);
+          return;
+        }
+        matches.forEach(function (p) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'city-btn';
+          btn.innerHTML =
+            '<span><span>' + escapeHtml(p.label || p.city || p.key) + '</span>' +
+            (p.brand ? '<span class="meta">' + escapeHtml(p.brand) + '</span>' : '') +
+            '</span><span class="city-arrow">→</span>';
+          btn.addEventListener('click', function () {
+            selectProfile(p.key);
+            show('rating');
+          });
+          grid.appendChild(btn);
+        });
+      }
+
+      const searchInput = document.getElementById('city-search');
+      searchInput.addEventListener('input', function () {
+        renderCityList(searchInput.value);
+      });
+
+      document.querySelectorAll('.rating-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          state.rating = btn.dataset.rating;
+          if (state.rating === 'excellent' || state.rating === 'good') {
+            document.getElementById('positive-title').textContent =
+              state.rating === 'excellent'
+                ? 'Thanks! We\'d love a Google review'
+                : 'Thanks! A quick Google review helps';
+            show('positive');
+          } else {
+            show('negative');
+          }
+        });
+      });
+
+      // Positive form → payment stub (or skip to success)
+      document.getElementById('form-positive').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const emailErr = document.getElementById('p-email-error');
+        emailErr.classList.remove('show');
+        const name = document.getElementById('p-name').value.trim();
+        const email = document.getElementById('p-email').value.trim();
+        const file = document.getElementById('p-screenshot').files[0];
+        if (!name) return;
+        if (!validEmail(email)) { emailErr.classList.add('show'); return; }
+        state.positive = {
+          name: name,
+          email: email,
+          screenshotName: file ? file.name : ''
+        };
+        document.getElementById('pay-contact').value = email;
+        // Stub only — log payload for Mark / local debug
+        console.log('[localhub-sms-v2 stub] positive step', {
+          rating: state.rating,
+          profileKey: state.profileKey,
+          brand: state.cfg && state.cfg.brand,
+          city: state.cfg && (state.cfg.city || state.cfg.label),
+          name: name,
+          email: email,
+          screenshot: state.positive.screenshotName || null
+        });
+        show('payment');
+      });
+
+      document.getElementById('p-skip-payment').addEventListener('click', function () {
+        finishSuccess(
+          'Thank you',
+          'We appreciate the review. No further action needed.'
+        );
+      });
+
+      document.getElementById('form-payment').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const method = document.getElementById('pay-method').value.trim();
+        const contact = document.getElementById('pay-contact').value.trim() || state.positive.email;
+        console.log('[localhub-sms-v2 stub] payment step', {
+          method: method,
+          contact: contact,
+          rating: state.rating,
+          profileKey: state.profileKey
+        });
+        finishSuccess(
+          'Submission received (stub)',
+          'Thank-you details saved locally for demo. No payment was processed.' +
+            (contact ? ' Contact on file: ' + contact + '.' : '')
+        );
+      });
+
+      document.getElementById('pay-skip').addEventListener('click', function () {
+        finishSuccess(
+          'Thank you',
+          'We appreciate your time. Optional thank-you was skipped.'
+        );
+      });
+
+      document.getElementById('form-negative').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const err = document.getElementById('n-error');
+        err.classList.remove('show');
+        const name = document.getElementById('n-name').value.trim();
+        const contact = document.getElementById('n-contact').value.trim();
+        const comment = document.getElementById('n-comment').value.trim();
+        if (!validContact(contact)) { err.classList.add('show'); return; }
+        console.log('[localhub-sms-v2 stub] negative feedback', {
+          rating: state.rating,
+          profileKey: state.profileKey,
+          brand: state.cfg && state.cfg.brand,
+          name: name,
+          contact: contact,
+          comment: comment
+        });
+        finishSuccess(
+          'Thanks for the feedback',
+          'The owner will review your message shortly. (Stub — nothing was sent to a server.)'
+        );
+      });
+
+      function finishSuccess(title, msg) {
+        document.getElementById('success-title').textContent = title;
+        document.getElementById('success-msg').textContent = msg;
+        show('success');
+      }
+
+      // Initial city list ready for when user continues
+      renderCityList('');
+    })();
+  </script>
+</body>
+</html>
