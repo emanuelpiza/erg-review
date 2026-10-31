@@ -244,11 +244,11 @@
   <!-- Real city profiles shared with ../sms-v2/ (copy of sms-v2/profiles.js; defines window.PROFILE_CONFIG) -->
   <script src="profiles.js"></script>
   <script>
-    // TODO: replace with the real n8n webhook URL (do not create the workflow here).
+    // GHL (Local Hub location) inbound webhook workflow: creates/updates the contact.
     // Receives multipart/form-data. Lead: type=ebook (name, email, phone, city, profile, ebook, source).
     // Feedback: type=feedback (message, name, email, city, profile, source).
     // Webhook must allow CORS from https://mylocal-hub.com.
-    const WEBHOOK_URL = 'TODO_N8N_WEBHOOK';
+    const WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/lbe9Un2hdxemTBsvnUKa/webhook-trigger/dc9f8007-ed58-4f7d-9bb2-50e5789fedd5';
     const SOURCE = 'localhub-start';
 
     // ---- profiles (from profiles.js) ----
@@ -294,8 +294,8 @@
         console.warn('WEBHOOK_URL is a placeholder; payload NOT sent:', Array.from(fd.entries()));
         return;
       }
-      const r = await fetch(WEBHOOK_URL, { method: 'POST', body: fd });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
+      // GHL inbound webhook: no-cors so the multipart POST always arrives (response is opaque, not readable).
+      await fetch(WEBHOOK_URL, { method: 'POST', body: fd, mode: 'no-cors' });
     }
 
     // ---- step 1: lead capture -> unlock ebook ----

@@ -5,7 +5,7 @@ Entry point: final-screen button of the Local Hub Facebook lead form -> https://
 ## Current flow (3 steps, every step reachable by everyone who completes step 1)
 
 1. **Free ebook** — name, email, optional phone + city. Submitting unlocks the download
-   `ebook/water-damage-guide.pdf` ("How to Prevent Costly Water Damage at Home", 8 pages, Local Hub branding).
+   `ebook/water-damage-guide.pdf` ("How to Prevent Costly Water Damage at Home", 18 pages, Local Hub branding; PDF replaced Oct 31 by an externally supplied version, so ebook/water-damage-guide.html is no longer its source).
    Source: `ebook/water-damage-guide.html` -> PDF via headless Chrome (see "Rebuild the ebook").
 2. **Honest review** — city -> nearest Local Hub profile (from `profiles.js`) -> **"Leave a review on Google"** button.
    - The button is the same for everyone, always available, no star question, no routing by rating.
@@ -36,7 +36,7 @@ cd start/ebook
 ```
 
 ## TODO before publishing
-- [ ] WEBHOOK_URL -> GHL inbound-webhook URL (needs a GHL UI step: Local Hub location > Automation > Workflows > new workflow, trigger "Inbound Webhook", action Create/Update Contact + tag localhub-start-ebook; paste the URL into WEBHOOK_URL). No GHL API token exists in the workspace.
+- [ ] WEBHOOK_URL set Oct 31 to the GHL inbound webhook (was: needs a GHL UI step: Local Hub location > Automation > Workflows > new workflow, trigger "Inbound Webhook", action Create/Update Contact + tag localhub-start-ebook; paste the URL into WEBHOOK_URL). No GHL API token exists in the workspace.
 - [x] Meta Pixel 26923651513991737 installed (PageView on load, Lead on successful step-1 submit) — Oct 31.
 - [ ] Reward text + delivery (step 3).
 - [ ] Multi-profile cities: rule for choosing the "nearest" profile (currently first listed).
