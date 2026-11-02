@@ -1,6 +1,6 @@
 # /start — Local Hub web follow-up (replaces the post-form SMS)
 
-Entry point: final-screen button of the Local Hub Facebook lead form -> https://mylocal-hub.com/start/
+Intended entry: Local Hub ads -> https://mylocal-hub.com/start/ directly, without a Meta lead form (confirmed in the group November 2; ad-side configuration is owned by Dani).
 
 ## Current flow (3 steps, every step reachable by everyone who completes step 1)
 
@@ -55,3 +55,11 @@ Matched the supplied Local Hub ad: navy/red/white palette, condensed bold welcom
 Validation: scripts and field schema unchanged, JS syntax checked, browser navigation through all three steps using a local-only webhook and disabled external pixel, 320px viewport without horizontal overflow. No production test lead or Google review submitted.
 
 The ebook offer now previews its actual PDF first page (`ebook/water-damage-guide-cover.webp`, 773×1000, about 90 KB). The cover opens at full size in a new tab; the old repeated title/description and generic book icon are removed. The 18-page PDF, lead form, webhook and pixel are unchanged.
+
+## Dani campaign tracking — November 2, 2026
+
+- Pixel `1101981286014464` replaces the previous pixel `26923651513991737`; only one pixel is initialized.
+- After the contact form sends its existing webhook request, the browser navigates to `/start/?thank-you=1`, preserving existing ad query parameters. Configure a URL rule with **contains `thank-you=1`**, rather than exact equality with the whole URL.
+- A one-time same-tab receipt is consumed before pixel initialization. The thank-you view unlocks the existing PDF and continuation, sends PageView and one Lead event, and does not add names/emails to the URL. Direct visits or refresh without a receipt return to the regular entry URL and do not emit Lead.
+- If first-party sessionStorage is unavailable, the original inline success and Lead event remain available; that fallback has no thank-you navigation.
+- Validation before release used local mocks for Meta and the contact webhook: two successful submits -> two Lead events; reload/direct visits and a network failure added none. No production test lead was created. Actual Meta Events Manager reception and GHL contact persistence are separate checks; the existing no-cors webhook does not confirm downstream CRM success.

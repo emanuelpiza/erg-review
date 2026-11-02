@@ -6,6 +6,26 @@
   <title>Local Hub — Welcome</title>
   <meta name="robots" content="noindex">
 
+  <!-- A one-time same-tab receipt keeps direct visits/refreshes from counting as leads. -->
+  <script>
+  (() => {
+    window.localHubEbookReceipt = null;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('thank-you') !== '1') return;
+    try {
+      const raw = sessionStorage.getItem('localhub-ebook-receipt');
+      sessionStorage.removeItem('localhub-ebook-receipt');
+      const receipt = raw ? JSON.parse(raw) : null;
+      if (receipt && typeof receipt.name === 'string' && typeof receipt.email === 'string' && typeof receipt.city === 'string') {
+        window.localHubEbookReceipt = receipt;
+        return;
+      }
+    } catch (_) { /* Storage unavailable or invalid: show the regular entry page. */ }
+    url.searchParams.delete('thank-you');
+    history.replaceState(history.state, '', url.href);
+  })();
+  </script>
+
   <!-- Meta Pixel Code -->
   <script>
   !function(f,b,e,v,n,t,s)
@@ -16,11 +36,11 @@
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '26923651513991737');
+  fbq('init', '1101981286014464');
   fbq('track', 'PageView');
   </script>
   <noscript><img height="1" width="1" style="display:none"
-  src="https://www.facebook.com/tr?id=26923651513991737&ev=PageView&noscript=1"
+  src="https://www.facebook.com/tr?id=1101981286014464&ev=PageView&noscript=1"
   /></noscript>
   <!-- End Meta Pixel Code -->
 
@@ -44,8 +64,8 @@
     .benefits svg{display:block;width:30px;height:30px;color:var(--red);margin:0 auto 10px}
     .ribbon{display:block;width:100%;height:120px;margin-top:28px;overflow:visible}
     .flow{min-width:0}
-    .wrap:has(#v-1:not(.active)) .intro{display:none}
-    .wrap:has(#v-1:not(.active)) .funnel-layout{grid-template-columns:minmax(0,480px);justify-content:center;margin-top:30px}
+    .wrap:has(#v-1:not(.active)) .intro,.wrap:has(#unlocked:not([hidden])) .intro{display:none}
+    .wrap:has(#v-1:not(.active)) .funnel-layout,.wrap:has(#unlocked:not([hidden])) .funnel-layout{grid-template-columns:minmax(0,480px);justify-content:center;margin-top:30px}
     .steps{display:flex;gap:8px;margin-bottom:18px;position:relative}
     .steps::before{content:"";position:absolute;left:16%;right:16%;top:16px;height:1px;background:var(--line);z-index:-1}
     .steps li{list-style:none;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px;color:#627084;font-size:11px;font-weight:700;text-align:center;line-height:1.3}
@@ -85,6 +105,7 @@
     .ebook a{display:block;width:190px;max-width:100%;margin:0 auto;text-decoration:none;border-radius:4px}
     .ebook img{display:block;width:100%;height:auto;border-radius:3px 5px 5px 3px;box-shadow:5px 8px 16px #071f4329;transform:rotate(-3deg);transition:transform .15s}
     .ebook a:hover img{transform:rotate(-3deg) translateY(-2px)}
+    #v-1:has(#unlocked:not([hidden])) > h2,#v-1:has(#unlocked:not([hidden])) > p.sub,#v-1:has(#unlocked:not([hidden])) > .ebook{display:none}
     .unlock{text-align:center;padding:12px 0 0}
     .success-icon{display:grid;place-items:center;font-size:34px;color:var(--red);line-height:1;margin:0 auto 16px;width:64px;height:64px;background:#fff0f2;border-radius:50%}
     .divider{border:0;border-top:1px solid var(--line);margin:20px 0 14px}
@@ -329,13 +350,27 @@
       fd.append('name', name); fd.append('email', email); fd.append('phone', phone); fd.append('city', city);
       fd.append('profile', prof ? prof.brand : ''); fd.append('source', SOURCE);
       const btn = $('leadBtn'); btn.disabled = true; btn.textContent = 'Unlocking…';
+      let navigating = false;
       try {
         await post(fd);
-        if (window.fbq) fbq('track', 'Lead');
-        unlock(name, email, city);
+        // Only the existing contact webhook receives the form details. Nothing is put in the URL.
+        const thankYouUrl = new URL(window.location.href);
+        thankYouUrl.searchParams.set('thank-you', '1');
+        try {
+          sessionStorage.setItem('localhub-ebook-receipt', JSON.stringify({ name, email, city }));
+          window.location.assign(thankYouUrl.href);
+          navigating = true;
+        } catch (_) {
+          // Preserve the original inline download if this browser blocks session storage.
+          try { sessionStorage.removeItem('localhub-ebook-receipt'); } catch (_) {}
+          unlock(name, email, city);
+          if (window.fbq) fbq('track', 'Lead');
+        }
       } catch (x) {
         fail(err, 'Sorry, something went wrong. Please try again in a moment.');
-      } finally { btn.disabled = false; btn.textContent = 'Unlock the free ebook'; }
+      } finally {
+        if (!navigating) { btn.disabled = false; btn.textContent = 'Unlock the free ebook'; }
+      }
     });
     function fail(el, msg) { el.textContent = msg; el.classList.add('show'); }
 
@@ -631,6 +666,15 @@
         fail(err, 'Sorry, something went wrong. Please try again in a moment.');
       } finally { btn.disabled = false; btn.textContent = 'Send private feedback'; }
     });
+
+    // The receipt is consumed before pixel initialization; revisits cannot fire this event again.
+    if (window.localHubEbookReceipt) {
+      const receipt = window.localHubEbookReceipt;
+      window.localHubEbookReceipt = null;
+      unlock(receipt.name, receipt.email, receipt.city);
+      document.title = 'Your ebook is ready | Local Hub';
+      if (window.fbq) fbq('track', 'Lead');
+    }
 
     // Step 3 is reachable by everyone who completed step 1 — never conditional on the review.
     $('toStep3').addEventListener('click', () => { if (state.unlocked) { setStep(3); document.querySelectorAll('#steps li').forEach(li => { if (+li.dataset.step < 3) li.classList.add('done'); }); } });
