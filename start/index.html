@@ -81,12 +81,12 @@
     .note{color:var(--muted);font-size:11px;line-height:1.6;margin:2px 0 18px}
     .note a{color:var(--navy);text-underline-offset:2px}
     .small{color:var(--muted);font-size:12px;margin:-4px 0 14px}.center{text-align:center}.center h2,.unlock h2{text-align:center}
-    .ebook{display:flex;gap:13px;align-items:center;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:22px}
-    .ebook .cover{flex:0 0 auto;width:49px;height:65px;border-radius:3px 6px 6px 3px;background:var(--navy);border-left:4px solid #18385f;color:#fff;display:grid;place-items:center;position:relative;box-shadow:3px 4px 0 #dce1e9}
-    .ebook .cover::after{content:"";position:absolute;bottom:10px;left:8px;right:8px;height:4px;background:var(--red)}
-    .ebook .cover svg{width:25px;height:25px;margin-bottom:8px}
-    .ebook .t{font-weight:800;font-size:14px;line-height:1.3;color:var(--navy)}
-    .ebook .d{color:var(--muted);font-size:12px;margin-top:5px;line-height:1.45}
+    .ebook{margin:0 0 22px;text-align:center;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:18px 16px 13px}
+    .ebook a{display:block;width:190px;max-width:100%;margin:0 auto;text-decoration:none;border-radius:4px}
+    .ebook img{display:block;width:100%;height:auto;border-radius:3px 5px 5px 3px;box-shadow:5px 8px 16px #071f4329;transition:transform .15s}
+    .ebook a:hover img{transform:translateY(-2px)}
+    .ebook figcaption{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-size:11px;color:var(--muted)}
+    .ebook .free{font-size:10px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;background:var(--navy);color:#fff;padding:3px 7px;border-radius:4px}
     .unlock{text-align:center;padding:12px 0 0}
     .success-icon{display:grid;place-items:center;font-size:34px;color:var(--red);line-height:1;margin:0 auto 16px;width:64px;height:64px;background:#fff0f2;border-radius:50%}
     .divider{border:0;border-top:1px solid var(--line);margin:20px 0 14px}
@@ -112,7 +112,7 @@
     footer a{color:#fff;text-underline-offset:3px}footer .sep{color:#ff4054;padding:0 12px}
     @media(max-width:800px){.wrap{max-width:580px;padding:20px 22px 0}.funnel-layout{grid-template-columns:1fr;gap:24px;margin:25px 0 30px}.intro{padding:0;text-align:center}.headline{font-size:36px;margin-bottom:13px;letter-spacing:-.5px}.intro-copy{font-size:17px;margin:auto;max-width:310px}.benefits{margin:22px auto 0;max-width:350px}.benefits li{font-size:11px;padding:0 9px}.benefits svg{width:24px;height:24px;margin-bottom:7px}.ribbon{height:35px;margin-top:14px;margin-bottom:-12px}.steps{margin-bottom:16px}.card{padding:23px 20px}footer{margin:0 -22px}}
     @media(max-width:360px){.wrap{padding:16px 14px 0}.headline{font-size:32px}.brand-logo{font-size:20px}.card{padding:20px 16px}.steps li{font-size:10px}footer{margin:0 -14px}}
-    @media(prefers-reduced-motion:reduce){.btn{transition:none}}
+    @media(prefers-reduced-motion:reduce){.btn,.ebook img{transition:none}}
   </style>
 </head>
 <body>
@@ -146,13 +146,12 @@
         <h2>1. Check the free ebook</h2>
         <p class="sub">Enter your details to unlock the download.</p>
 
-        <div class="ebook">
-          <div class="cover" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7v16H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm16 0h-7v16h7a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/></svg></div>
-          <div>
-            <div class="t">How to Prevent Costly Water Damage at Home</div>
-            <div class="d">A practical home guide from the Local Hub network: causes, checklists and what to do in the first hour. Free.</div>
-          </div>
-        </div>
+        <figure class="ebook">
+          <a href="ebook/water-damage-guide-cover.webp" target="_blank" rel="noopener" aria-label="Preview the cover of How to Prevent Costly Water Damage at Home">
+            <img src="ebook/water-damage-guide-cover.webp" width="773" height="1000" alt="How to Prevent Costly Water Damage at Home, a Local Hub guide, with a home sheltered from the rain." fetchpriority="high" decoding="async">
+          </a>
+          <figcaption><span class="free">Free ebook</span><span>18 pages · PDF</span></figcaption>
+        </figure>
 
         <form id="leadForm" novalidate>
           <label for="lName">Name</label>
