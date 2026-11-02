@@ -59,7 +59,7 @@ The ebook offer now previews its actual PDF first page (`ebook/water-damage-guid
 ## Dani campaign tracking — November 2, 2026
 
 - Pixel `1101981286014464` replaces the previous pixel `26923651513991737`; only one pixel is initialized.
-- After the contact form sends its existing webhook request, the browser navigates to `/start/?thank-you=1`, preserving existing ad query parameters. Configure a URL rule with **contains `thank-you=1`**, rather than exact equality with the whole URL.
-- A one-time same-tab receipt is consumed before pixel initialization. The thank-you view unlocks the existing PDF and continuation, sends PageView and one Lead event, and does not add names/emails to the URL. Direct visits or refresh without a receipt return to the regular entry URL and do not emit Lead.
-- If first-party sessionStorage is unavailable, the original inline success and Lead event remain available; that fallback has no thank-you navigation.
+- After the contact form sends its existing webhook request, the browser navigates to `/start/?thank-you=1`, preserving existing ad query parameters. Configure the conversion with the standard **Lead event**. Page visits are not lead conversions.
+- A same-tab receipt retains the form context until the tab is closed; only its pending-conversion flag is consumed. The thank-you view always keeps the PDF and continuation accessible, including direct visits and refreshes. Lead fires only for a pending form submission. Names/emails are never added to the URL.
+- If first-party sessionStorage is unavailable, the thank-you URL, inline download and one Lead event remain available; refresh still displays the thank-you view without another Lead.
 - Validation before release used local mocks for Meta and the contact webhook: two successful submits -> two Lead events; reload/direct visits and a network failure added none. No production test lead was created. Actual Meta Events Manager reception and GHL contact persistence are separate checks; the existing no-cors webhook does not confirm downstream CRM success.

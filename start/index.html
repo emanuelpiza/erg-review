@@ -6,23 +6,25 @@
   <title>Local Hub — Welcome</title>
   <meta name="robots" content="noindex">
 
-  <!-- A one-time same-tab receipt keeps direct visits/refreshes from counting as leads. -->
+  <!-- Keep the thank-you view available; consume only its pending conversion flag. -->
   <script>
   (() => {
+    window.localHubIsThankYou = new URL(window.location.href).searchParams.get('thank-you') === '1';
     window.localHubEbookReceipt = null;
-    const url = new URL(window.location.href);
-    if (url.searchParams.get('thank-you') !== '1') return;
+    window.localHubTrackLead = false;
+    if (!window.localHubIsThankYou) return;
     try {
       const raw = sessionStorage.getItem('localhub-ebook-receipt');
-      sessionStorage.removeItem('localhub-ebook-receipt');
       const receipt = raw ? JSON.parse(raw) : null;
       if (receipt && typeof receipt.name === 'string' && typeof receipt.email === 'string' && typeof receipt.city === 'string') {
         window.localHubEbookReceipt = receipt;
-        return;
+        window.localHubTrackLead = receipt.leadPending !== false;
+        sessionStorage.setItem('localhub-ebook-receipt', JSON.stringify({ ...receipt, leadPending: false }));
       }
-    } catch (_) { /* Storage unavailable or invalid: show the regular entry page. */ }
-    url.searchParams.delete('thank-you');
-    history.replaceState(history.state, '', url.href);
+    } catch (_) {
+      // If the conversion flag cannot be saved, discard the receipt to avoid replaying it.
+      try { sessionStorage.removeItem('localhub-ebook-receipt'); } catch (_) {}
+    }
   })();
   </script>
 
@@ -189,7 +191,7 @@
         <div class="unlock" id="unlocked" hidden>
           <div class="success-icon">&#10003;</div>
           <h2>Your ebook is unlocked</h2>
-          <p class="sub">Thanks, <span id="uName"></span>. Download it now &mdash; then take two quick steps to finish.</p>
+          <p class="sub">Thanks<span id="uName"></span>. Download it now &mdash; then take two quick steps to finish.</p>
           <!-- Ebook: ebook/water-damage-guide.pdf (source: ebook/water-damage-guide.html) -->
           <a class="btn green" id="ebookLink" href="ebook/water-damage-guide.pdf" target="_blank" rel="noopener" download>Download the free ebook (PDF)</a>
           <button class="btn" type="button" id="toStep2">Continue to step 2</button>
@@ -357,12 +359,14 @@
         const thankYouUrl = new URL(window.location.href);
         thankYouUrl.searchParams.set('thank-you', '1');
         try {
-          sessionStorage.setItem('localhub-ebook-receipt', JSON.stringify({ name, email, city }));
+          sessionStorage.setItem('localhub-ebook-receipt', JSON.stringify({ name, email, city, leadPending: true }));
           window.location.assign(thankYouUrl.href);
           navigating = true;
         } catch (_) {
-          // Preserve the original inline download if this browser blocks session storage.
+          // Keep the thank-you URL and inline download if this browser blocks session storage.
           try { sessionStorage.removeItem('localhub-ebook-receipt'); } catch (_) {}
+          history.replaceState(history.state, '', thankYouUrl.href);
+          document.title = 'Your ebook is ready | Local Hub';
           unlock(name, email, city);
           if (window.fbq) fbq('track', 'Lead');
         }
@@ -376,7 +380,7 @@
 
     function unlock(name, email, city) {
       Object.assign(state, { name, email, city, unlocked: true });
-      $('uName').textContent = name.split(' ')[0];
+      $('uName').textContent = name ? ', ' + name.split(' ')[0] : '';
       $('leadForm').hidden = true; $('unlocked').hidden = false;
       document.querySelector('#steps li[data-step="1"]').classList.add('done');
       $('rCity').value = city; resolveCity();
@@ -667,13 +671,12 @@
       } finally { btn.disabled = false; btn.textContent = 'Send private feedback'; }
     });
 
-    // The receipt is consumed before pixel initialization; revisits cannot fire this event again.
-    if (window.localHubEbookReceipt) {
-      const receipt = window.localHubEbookReceipt;
-      window.localHubEbookReceipt = null;
+    // Opening or refreshing this URL keeps the download available without another Lead event.
+    if (window.localHubIsThankYou) {
+      const receipt = window.localHubEbookReceipt || { name: '', email: '', city: '' };
       unlock(receipt.name, receipt.email, receipt.city);
       document.title = 'Your ebook is ready | Local Hub';
-      if (window.fbq) fbq('track', 'Lead');
+      if (window.localHubTrackLead && window.fbq) fbq('track', 'Lead');
     }
 
     // Step 3 is reachable by everyone who completed step 1 — never conditional on the review.
