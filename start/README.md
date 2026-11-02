@@ -47,3 +47,9 @@ cd start/ebook
 
 Guardrails: no payment, no incentive for reviews, no rating gating, no ERG name in the page body.
 Suggested review text is optional, editable, and never required.
+
+## Visual identity — November 2, 2026
+
+Matched the supplied Local Hub ad: navy/red/white palette, condensed bold welcome title, red pill buttons, three red benefit icons and curved stripe/star decoration. Responsive two-column desktop / single-column mobile layout; the welcome panel appears only on step 1. Form IDs, scripts, webhook, pixel and ebook file are unchanged. The public reward TODO is now an honest pending message; no reward or payment amount is defined by this visual update.
+
+Validation: scripts and field schema unchanged, JS syntax checked, browser navigation through all three steps using a local-only webhook and disabled external pixel, 320px viewport without horizontal overflow. No production test lead or Google review submitted.
