@@ -314,6 +314,47 @@
 
     // ---- state / navigation ----
     const state = { name: '', email: '', city: '', profile: null, unlocked: false };
+    const PROGRESS_KEY = 'localhub-funnel-progress';
+    const FUNNEL_EVENTS = {
+      signup_completed: 'Lead',
+      ebook_download_clicked: 'LocalHubEbookDownloadClicked',
+      review_step_viewed: 'LocalHubReviewStepViewed',
+      google_review_clicked: 'LocalHubGoogleReviewClicked',
+      city_unavailable: 'LocalHubCityUnavailable',
+      private_feedback_sent: 'LocalHubPrivateFeedbackSent',
+      reward_step_viewed: 'LocalHubRewardStepViewed'
+    };
+    let funnelProgress = null;
+
+    function startFunnelProgress() {
+      const id = window.crypto && typeof window.crypto.randomUUID === 'function'
+        ? window.crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+      funnelProgress = { id, events: [] };
+      saveFunnelProgress();
+    }
+
+    function saveFunnelProgress() {
+      try { sessionStorage.setItem(PROGRESS_KEY, JSON.stringify(funnelProgress)); } catch (_) {}
+    }
+
+    function trackFunnelStage(stage) {
+      if (!state.unlocked || !state.email || !funnelProgress || !FUNNEL_EVENTS[stage]) return;
+      if (funnelProgress.events.includes(stage) || typeof window.fbq !== 'function') return;
+      try {
+        const kind = stage === 'signup_completed' ? 'track' : 'trackCustom';
+        // This identifier is random. Contact details stay in the existing GHL form request.
+        fbq(kind, FUNNEL_EVENTS[stage], { funnel: SOURCE, stage }, { eventID: funnelProgress.id + ':' + stage });
+        funnelProgress.events.push(stage);
+        saveFunnelProgress();
+      } catch (_) {
+        // Analytics must never stop the visitor from continuing.
+      }
+    }
+
+    function trackUnavailableCity() {
+      const city = $('rCity').value.trim();
+      if (city && matchLabels(city).length === 0) trackFunnelStage('city_unavailable');
+    }
 
     function setStep(n) {
       document.querySelectorAll('#steps li').forEach(li => {
@@ -323,6 +364,11 @@
       });
       document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'v-' + n));
       window.scrollTo(0, 0);
+      if (n === 2) {
+        trackFunnelStage('review_step_viewed');
+        trackUnavailableCity();
+      }
+      if (n === 3) trackFunnelStage('reward_step_viewed');
     }
 
     async function post(fd) {
@@ -355,6 +401,7 @@
       let navigating = false;
       try {
         await post(fd);
+        startFunnelProgress();
         // Only the existing contact webhook receives the form details. Nothing is put in the URL.
         const thankYouUrl = new URL(window.location.href);
         thankYouUrl.searchParams.set('thank-you', '1');
@@ -368,7 +415,7 @@
           history.replaceState(history.state, '', thankYouUrl.href);
           document.title = 'Your ebook is ready | Local Hub';
           unlock(name, email, city);
-          if (window.fbq) fbq('track', 'Lead');
+          trackFunnelStage('signup_completed');
         }
       } catch (x) {
         fail(err, 'Sorry, something went wrong. Please try again in a moment.');
@@ -387,6 +434,10 @@
       window.scrollTo(0, 0);
     }
     $('toStep2').addEventListener('click', () => setStep(2));
+    $('ebookLink').addEventListener('click', () => trackFunnelStage('ebook_download_clicked'));
+    $('reviewBtn').addEventListener('click', () => {
+      if (state.profile && okUrl(state.profile.reviewUrl)) trackFunnelStage('google_review_clicked');
+    });
 
     // ---- step 2: city -> nearest profile -> Google review link (same for everyone) ----
     // INTEGRATION POINT: custom review step
@@ -416,6 +467,7 @@
     }
     $('rCity').addEventListener('input', resolveCity);
     $('rCity').addEventListener('change', resolveCity);
+    $('rCity').addEventListener('blur', trackUnavailableCity);
     $('rPickSel').addEventListener('change', e => setReview(e.target.value ? profileForLabel(e.target.value) : null));
 
 
@@ -666,6 +718,7 @@
       try {
         await post(fd);
         $('fbMsg').value = ''; $('fbForm').hidden = true; $('fbOk').classList.add('show');
+        trackFunnelStage('private_feedback_sent');
       } catch (x) {
         fail(err, 'Sorry, something went wrong. Please try again in a moment.');
       } finally { btn.disabled = false; btn.textContent = 'Send private feedback'; }
@@ -674,9 +727,17 @@
     // Opening or refreshing this URL keeps the download available without another Lead event.
     if (window.localHubIsThankYou) {
       const receipt = window.localHubEbookReceipt || { name: '', email: '', city: '' };
+      if (receipt.email) {
+        try {
+          const saved = JSON.parse(sessionStorage.getItem(PROGRESS_KEY));
+          if (saved && typeof saved.id === 'string' && Array.isArray(saved.events)) funnelProgress = saved;
+        } catch (_) {}
+        // Existing receipts can record future actions without replaying their signup.
+        if (!funnelProgress) startFunnelProgress();
+      }
       unlock(receipt.name, receipt.email, receipt.city);
       document.title = 'Your ebook is ready | Local Hub';
-      if (window.localHubTrackLead && window.fbq) fbq('track', 'Lead');
+      if (window.localHubTrackLead) trackFunnelStage('signup_completed');
     }
 
     // Step 3 is reachable by everyone who completed step 1 — never conditional on the review.

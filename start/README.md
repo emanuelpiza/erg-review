@@ -17,15 +17,13 @@ Intended entry: Local Hub ads -> https://mylocal-hub.com/start/ directly, withou
    - `// INTEGRATION POINT: custom review step` marks where any custom review logic would plug in.
 3. **Reward** — shown to everyone who completed step 1 (does not depend on the review). Reward text/delivery still TODO.
 
-## n8n
+## Contact intake (GHL)
 - Only **one** webhook is needed, and only for lead capture (+ optional private feedback). The picker itself is
   100% client-side (static JS) and needs no n8n.
-- `WEBHOOK_URL = 'TODO_N8N_WEBHOOK'` in `index.html` (while it is a placeholder nothing is sent; payload is logged to console).
-  Receives multipart/form-data, CORS must allow https://mylocal-hub.com:
+- `WEBHOOK_URL` in `index.html` points to the existing Local Hub GHL inbound webhook. It receives multipart/form-data through a no-cors request:
   - `type=ebook`: name, email, phone, city, profile, ebook (`water-damage-guide`), source
   - `type=feedback`: message, name, email, city, profile, source
-- Suggested workflow: Webhook -> (If `type`) -> store lead (Sheet/CRM) + email the ebook link / notify team.
-  The ebook is also directly downloadable on-page, so the email is a nice-to-have, not a dependency.
+- Published workflow: inbound webhook -> create/update contact -> tag `localhub-start-ebook`. It currently does not filter `type=feedback`; no new stage events are sent through this route. The ebook is downloaded on-page; no automatic ebook email is configured.
 - The root page's separate gift-card webhook (`erg-giftogram-submit`) is NOT used here.
 
 ## Rebuild the ebook
@@ -36,8 +34,8 @@ cd start/ebook
 ```
 
 ## TODO before publishing
-- [ ] WEBHOOK_URL set Oct 31 to the GHL inbound webhook (was: needs a GHL UI step: Local Hub location > Automation > Workflows > new workflow, trigger "Inbound Webhook", action Create/Update Contact + tag localhub-start-ebook; paste the URL into WEBHOOK_URL). No GHL API token exists in the workspace.
-- [x] Meta Pixel 26923651513991737 installed (PageView on load, Lead on successful step-1 submit) — Oct 31.
+- [x] WEBHOOK_URL set Oct 31 to the GHL inbound webhook (was: needs a GHL UI step: Local Hub location > Automation > Workflows > new workflow, trigger "Inbound Webhook", action Create/Update Contact + tag localhub-start-ebook; paste the URL into WEBHOOK_URL). No GHL API token exists in the workspace.
+- [x] Meta Pixel `1101981286014464` active (replaced the original pixel November 2).
 - [ ] Reward text + delivery (step 3).
 - [ ] Multi-profile cities: rule for choosing the "nearest" profile (currently first listed).
 - [x] /privacy/ and /terms/ rewritten for this flow (no SMS, no payment, no ERG name; Local Hub operator) — Oct 31.
@@ -63,3 +61,23 @@ The ebook offer now previews its actual PDF first page (`ebook/water-damage-guid
 - A same-tab receipt retains the form context until the tab is closed; only its pending-conversion flag is consumed. The thank-you view always keeps the PDF and continuation accessible, including direct visits and refreshes. Lead fires only for a pending form submission. Names/emails are never added to the URL.
 - If first-party sessionStorage is unavailable, the thank-you URL, inline download and one Lead event remain available; refresh still displays the thank-you view without another Lead.
 - Validation before release used local mocks for Meta and the contact webhook: two successful submits -> two Lead events; reload/direct visits and a network failure added none. No production test lead was created. Actual Meta Events Manager reception and GHL contact persistence are separate checks; the existing no-cors webhook does not confirm downstream CRM success.
+
+## Funnel stages — November 5, 2026
+
+Events use the existing Local Hub Meta pixel. In Meta Events Manager, select **Local Hub Pixels** (`1101981286014464`) and its event overview/date range. Custom events appear after Meta receives them from visitors. These are aggregate stage counts, not named stage histories in GHL or automatically added Ads Manager report columns.
+
+| Event | What it measures |
+| --- | --- |
+| `Lead` | Existing signup webhook request completed in the browser; downstream GHL receipt remains a separate check |
+| `LocalHubEbookDownloadClicked` | Click on the PDF download |
+| `LocalHubReviewStepViewed` | Opened step 2 |
+| `LocalHubGoogleReviewClicked` | Click on a valid Google review link |
+| `LocalHubCityUnavailable` | Entered step 2 with an unmatched city, or left its city field with no match |
+| `LocalHubPrivateFeedbackSent` | Optional private-feedback webhook request completed in the browser |
+| `LocalHubRewardStepViewed` | Opened step 3 |
+
+Each stage is queued once per successful form submission in the same tab. Refresh, returning to a step, and repeated clicks do not add stage events; a new submission starts a new journey. The random event ID contains no contact details. New event parameters contain only the funnel and stage names. Existing same-tab receipts can measure future actions without replaying a signup. Direct thank-you visitors without a signup receipt do not produce Lead or post-signup stage events.
+
+The PDF and Google events measure clicks, not completed downloads or published reviews. Reward view does not prove reward delivery. Stages are optional, so counts do not have to form a strict decreasing sequence. Pixel blocking, closing the tab, and new sessions limit coverage; no earlier missing stages can be recovered. No-cors requests cannot verify downstream CRM persistence.
+
+Validation used local Meta/GHL/Google mocks: two submits produced two Leads, every new event fired, repeat navigation and refresh did not duplicate stages, an unmatched city was counted, and a direct thank-you visit produced only PageView. Regression checks cover blocked storage, pixel errors, distinct submission IDs and absence of contact details in event parameters. No production test lead or Google review was created.
