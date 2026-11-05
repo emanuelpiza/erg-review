@@ -84,6 +84,8 @@ Validation used local Meta/GHL/Google mocks: two submits produced two Leads, eve
 
 ## Named contact history — November 5, 2026
 
+Candidate prepared and locally tested. GHL workflow remains a saved draft pending approval of additional metered usage, activation and a real contact-note persistence test. Main/production still uses the aggregate-only release.
+
 A dedicated GHL workflow, **Local Hub /start funnel progress** (`ae7d111b-f461-48f1-8140-e98578182445`), receives progress snapshots. The original signup/private-feedback webhook is unchanged. The progress workflow maps only the submitted email in Create/Update Contact, then adds a **Local Hub funnel progress** note. It does not send messages, change the stored phone/city, award rewards, or mark reviews as verified. GHL notes contain the original signup city, each observed stage/time, the city typed at that stage, selected location and the clicked Google URL.
 
 The browser batches rapid actions into one snapshot and spaces subsequent sends by at least five seconds. Each note repeats the full observed journey so an operator can read the latest note without reconciling individual clicks. Previously transmitted core stages and repeated selection of the same city/profile are deduplicated in the tab. Optional city/location changes are bounded; core stages are retained. Pending history is kept in the existing session storage and retried on a later action/reload after a transport failure. A pagehide beacon attempts to preserve the latest unsent snapshot when the tab closes. These transports cannot acknowledge GHL workflow persistence.
