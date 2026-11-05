@@ -315,6 +315,17 @@
     // ---- state / navigation ----
     const state = { name: '', email: '', city: '', profile: null, unlocked: false };
     const PROGRESS_KEY = 'localhub-funnel-progress';
+    const CONTACT_TRACKING_URL = 'https://services.leadconnectorhq.com/hooks/lbe9Un2hdxemTBsvnUKa/webhook-trigger/a54ebed1-07da-4f1f-8b12-703c495710a7';
+    const STAGE_LABELS = {
+      signup_completed: 'Submitted signup',
+      ebook_download_clicked: 'Clicked ebook download',
+      review_step_viewed: 'Opened review step',
+      google_review_clicked: 'Clicked Google review link',
+      city_unavailable: 'City has no matching location',
+      private_feedback_sent: 'Sent private feedback request',
+      reward_step_viewed: 'Opened reward step',
+      review_location_selected: 'Selected review location'
+    };
     const FUNNEL_EVENTS = {
       signup_completed: 'Lead',
       ebook_download_clicked: 'LocalHubEbookDownloadClicked',
@@ -325,6 +336,7 @@
       reward_step_viewed: 'LocalHubRewardStepViewed'
     };
     let funnelProgress = null;
+    let contactSyncTimer, contactSyncBusy = false, contactInFlightCount = 0, contactLastSentAt = 0;
 
     function startFunnelProgress() {
       const id = window.crypto && typeof window.crypto.randomUUID === 'function'
@@ -337,12 +349,88 @@
       try { sessionStorage.setItem(PROGRESS_KEY, JSON.stringify(funnelProgress)); } catch (_) {}
     }
 
+    function contactHistory() {
+      if (!Array.isArray(funnelProgress.contactHistory)) funnelProgress.contactHistory = [];
+      return funnelProgress.contactHistory;
+    }
+
+    function recordContactStage(stage) {
+      if (!state.unlocked || !state.email || !funnelProgress || !STAGE_LABELS[stage]) return;
+      const history = contactHistory();
+      const city = $('rCity').value.trim().slice(0, 120);
+      const profile = state.profile;
+      const key = ['city_unavailable', 'review_location_selected'].includes(stage)
+        ? stage + ':' + city + ':' + (profile ? profile.key : '') : stage;
+      if (history.some(event => event.key === key)) return;
+      // Bound optional city changes while retaining every core funnel stage.
+      if (['city_unavailable', 'review_location_selected'].includes(stage) && history.filter(event => event.stage === stage).length >= 10) return;
+      history.push({ key, stage, at: new Date().toISOString(), city,
+        profile: profile ? profile.brand : '', profileId: profile ? profile.key : '', reviewUrl: profile ? profile.reviewUrl : '', location: profile ? profile.label : '' });
+      saveFunnelProgress();
+      clearTimeout(contactSyncTimer);
+      contactSyncTimer = setTimeout(() => syncContactProgress(), 1200);
+    }
+
+    function contactPayload() {
+      const history = contactHistory();
+      const last = history[history.length - 1];
+      const text = value => esc(String(value || '').replace(/[\r\n\t]/g, ' ').slice(0, 160));
+      const lines = ['Local Hub funnel progress', 'Signup city: ' + text(state.city || 'Not provided')];
+      history.forEach(event => lines.push(text(event.at) + ' | ' + STAGE_LABELS[event.stage]
+        + ' | Review city: ' + text(event.city || 'Not provided')
+        + ' | Location: ' + text(event.profile ? event.profile + ' (' + event.location + ')' : 'No matching location selected')
+        + (event.stage === 'google_review_clicked' ? ' | Google link: ' + text(event.reviewUrl) : '')));
+      lines.push('Google/PDF clicks do not confirm a published review/completed download. Reward view does not confirm delivery.');
+      lines.push('Journey: ' + text(funnelProgress.id));
+      return new URLSearchParams({ source: SOURCE, type: 'funnel-stage', email: state.email,
+        stage: last.stage, stage_label: STAGE_LABELS[last.stage], occurred_at: last.at,
+        submitted_city: state.city, review_city: last.city, profile: last.profile, profile_id: last.profileId,
+        event_id: funnelProgress.id + ':' + history.length, journey_id: funnelProgress.id,
+        note: lines.join('<br>') });
+    }
+
+    async function syncContactProgress(leaving = false) {
+      if (!funnelProgress || !state.unlocked || !state.email) return;
+      const count = contactHistory().length;
+      if (!count || count <= (funnelProgress.contactSent || 0)) return;
+      clearTimeout(contactSyncTimer);
+      if (leaving) {
+        // Keep the last snapshot alive when the tab closes. In-flight snapshots already cover earlier events.
+        if (count > contactInFlightCount && navigator.sendBeacon) {
+          try { navigator.sendBeacon(CONTACT_TRACKING_URL, contactPayload()); } catch (_) {}
+        }
+        return;
+      }
+      if (contactSyncBusy) return;
+      const delay = 5000 - (Date.now() - contactLastSentAt);
+      if (delay > 0) { contactSyncTimer = setTimeout(() => syncContactProgress(), delay); return; }
+      const progress = funnelProgress;
+      contactSyncBusy = true; contactInFlightCount = count;
+      try {
+        // Only this dedicated notes workflow receives identity and location data; Meta stays anonymous.
+        await fetch(CONTACT_TRACKING_URL, { method: 'POST', body: contactPayload(), mode: 'no-cors', keepalive: true });
+        progress.contactSent = count;
+        if (progress === funnelProgress) saveFunnelProgress();
+      } catch (_) {
+        // Retain the unsent snapshot for a later action or reload. Never interrupt the funnel.
+      } finally {
+        contactSyncBusy = false; contactInFlightCount = 0; contactLastSentAt = Date.now();
+        if (funnelProgress === progress && contactHistory().length > count) {
+          contactSyncTimer = setTimeout(() => syncContactProgress(), 5000);
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') syncContactProgress(); });
+    window.addEventListener('pagehide', () => syncContactProgress(true));
+
     function trackFunnelStage(stage) {
       if (!state.unlocked || !state.email || !funnelProgress || !FUNNEL_EVENTS[stage]) return;
+      recordContactStage(stage);
       if (funnelProgress.events.includes(stage) || typeof window.fbq !== 'function') return;
       try {
         const kind = stage === 'signup_completed' ? 'track' : 'trackCustom';
-        // This identifier is random. Contact details stay in the existing GHL form request.
+        // This identifier is random. Contact details go only to the existing GHL account, never to Meta event parameters.
         fbq(kind, FUNNEL_EVENTS[stage], { funnel: SOURCE, stage }, { eventID: funnelProgress.id + ':' + stage });
         funnelProgress.events.push(stage);
         saveFunnelProgress();
@@ -467,8 +555,14 @@
     }
     $('rCity').addEventListener('input', resolveCity);
     $('rCity').addEventListener('change', resolveCity);
-    $('rCity').addEventListener('blur', trackUnavailableCity);
-    $('rPickSel').addEventListener('change', e => setReview(e.target.value ? profileForLabel(e.target.value) : null));
+    $('rCity').addEventListener('blur', () => {
+      trackUnavailableCity();
+      if (state.profile) recordContactStage('review_location_selected');
+    });
+    $('rPickSel').addEventListener('change', e => {
+      setReview(e.target.value ? profileForLabel(e.target.value) : null);
+      if (state.profile) recordContactStage('review_location_selected');
+    });
 
 
     // ---- optional review ideas (adapted from root customer mode; no rating, no gating, copy-only) ----
@@ -738,6 +832,7 @@
       unlock(receipt.name, receipt.email, receipt.city);
       document.title = 'Your ebook is ready | Local Hub';
       if (window.localHubTrackLead) trackFunnelStage('signup_completed');
+      syncContactProgress();
     }
 
     // Step 3 is reachable by everyone who completed step 1 — never conditional on the review.
