@@ -15,7 +15,7 @@ window.PROFILE_CONFIG = {
       "p_09c7c1c4": {"label": "Vaughan, Ontario", "brand": "Blue Line Recovery", "city": "Vaughan", "state": "Ontario", "country": "Canada", "reviewUrl": "https://maps.app.goo.gl/6jcwrYfSd9QuzYXq6"},
       "p_72a0915c": {"label": "Aurora, Ontario", "brand": "First Guard Restoration", "city": "Aurora", "state": "Ontario", "country": "Canada", "reviewUrl": "https://maps.app.goo.gl/TGSKgGfTLx6WJH6w6"},
       "p_da83f2c4": {"label": "North York, Canada", "brand": "Circle Restoration Group", "city": "North York", "country": "Canada", "reviewUrl": "https://maps.app.goo.gl/izEtjPBeSK4ahHPy6"},
-      "p_4070ac47": {"label": "Brampton, Canada", "brand": "Greg & Sons Restoration", "city": "Brampton", "country": "Canada", "reviewUrl": "https://maps.app.goo.gl/uqJkrjo1a9qjRTsL9"},
+      "p_4070ac47": {"label": "Brampton, Canada", "brand": "BRM Restoration Services", "city": "Brampton", "country": "Canada", "reviewUrl": "https://maps.app.goo.gl/6npoirPTwNvGDEiB9"},
       "p_650e28e6": {"label": "Toronto, Canada", "brand": "Dry Kings Toronto", "city": "Toronto", "country": "Canada", "reviewUrl": "https://share.google/8xMfKJtxKdStR7TNY"},
       "p_bf2c32bb": {"label": "Edmonton, Canada", "brand": "Quick Restoration", "city": "Edmonton", "country": "Canada", "reviewUrl": "https://maps.app.goo.gl/wcSJtFRCA8cj5tok8"},
       "p_c4983bc5": {"label": "Calgary, Canada", "brand": "Clean Response Mitigation", "city": "Calgary", "country": "Canada", "reviewUrl": "https://maps.app.goo.gl/TKbq1jayxBTfPgK28"},

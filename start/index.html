@@ -97,6 +97,8 @@
     .btn.green:hover{background:#bd0015;border-color:#bd0015}
     .btn:disabled,.btn.disabled{background:#e9ecf1;color:#6c788a;border-color:#e9ecf1;cursor:not-allowed;pointer-events:none}
     .error{color:#b40017;font-size:14px;margin:-5px 0 12px;display:none}.error.show{display:block}
+    .city-notice{display:none;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px;color:var(--navy);font-size:14px}.city-notice.show{display:block}
+    #reviewBtn[hidden],#reviewHelp[hidden],#ideasBox[hidden]{display:none}
     .profile{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px}
     .profile .tag{font-size:11px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
     .profile .name{font-size:18px;font-weight:800}.profile .city{color:var(--muted);font-size:14px}
@@ -201,7 +203,7 @@
       <!-- ============ STEP 2: review ============ -->
       <section class="view" id="v-2">
         <h2>2. Leave your Review</h2>
-        <p class="sub">Tell us your city and we'll point you to the Local Hub service closest to you. Share your own experience in your own words &mdash; whatever it was.</p>
+        <p class="sub">Choose your city to find a Local Hub review page. Only review a service you've used. You can also continue without leaving a review.</p>
 
         <label for="rCity">Your city</label>
         <input type="text" id="rCity" list="cityList" autocomplete="address-level2" placeholder="Start typing your city">
@@ -209,13 +211,13 @@
           <label for="rPickSel">Which one?</label>
           <select id="rPickSel"></select>
         </div>
-        <div class="error" id="rErr"></div>
+        <div class="city-notice" id="rErr" role="status" aria-live="polite"></div>
 
         <div class="profile" id="profileBox" hidden></div>
 
         <!-- Same button, same destination for every visitor. No rating question, no routing by rating. -->
         <a class="btn disabled" id="reviewBtn" href="#" target="_blank" rel="noopener" aria-disabled="true">Leave a review on Google</a>
-        <p class="small center">Opens Google Maps in a new tab. Reviews are optional and entirely your own words.</p>
+        <p class="small center" id="reviewHelp">Opens Google Maps in a new tab. Reviews are optional and entirely your own words.</p>
 
 
         <!-- Optional helper: suggested wording the person can edit and copy. Does not gate, route or replace the Google button above. -->
@@ -282,8 +284,8 @@
   <script>
     // GHL (Local Hub location) inbound webhook workflow: creates/updates the contact.
     // Receives multipart/form-data. Lead: type=ebook (name, email, phone, city, profile, ebook, source).
-    // Feedback: type=feedback (message, name, email, city, profile, source).
-    // Webhook must allow CORS from https://mylocal-hub.com.
+    // Progress and private feedback use a separate email-only contact-notes workflow below.
+    // Contact data stays in POST bodies, never in URLs.
     const WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/lbe9Un2hdxemTBsvnUKa/webhook-trigger/dc9f8007-ed58-4f7d-9bb2-50e5789fedd5';
     const SOURCE = 'localhub-start';
 
@@ -459,13 +461,13 @@
       if (n === 3) trackFunnelStage('reward_step_viewed');
     }
 
-    async function post(fd) {
-      if (WEBHOOK_URL.indexOf('TODO') === 0) { // webhook not configured yet: preview mode, nothing is sent
+    async function post(fd, url = WEBHOOK_URL) {
+      if (url.indexOf('TODO') === 0) { // webhook not configured yet: preview mode, nothing is sent
         console.warn('WEBHOOK_URL is a placeholder; payload NOT sent:', Array.from(fd.entries()));
         return;
       }
-      // GHL inbound webhook: no-cors so the multipart POST always arrives (response is opaque, not readable).
-      await fetch(WEBHOOK_URL, { method: 'POST', body: fd, mode: 'no-cors' });
+      // The opaque no-cors response confirms browser transport only; verify downstream receipt in GHL.
+      await fetch(url, { method: 'POST', body: fd, mode: 'no-cors', keepalive: true });
     }
 
     // ---- step 1: lead capture -> unlock ebook ----
@@ -532,7 +534,11 @@
     function setReview(prof) {
       const a = $('reviewBtn'), box = $('profileBox');
       state.profile = prof;
-      if (prof && okUrl(prof.reviewUrl)) {
+      const available = !!(prof && okUrl(prof.reviewUrl));
+      a.hidden = !available;
+      $('reviewHelp').hidden = !available;
+      $('ideasBox').hidden = !available;
+      if (available) {
         a.href = prof.reviewUrl; a.classList.remove('disabled'); a.removeAttribute('aria-disabled');
         box.innerHTML = '<div class="tag">Closest to you</div><div class="name">' + esc(prof.brand) + '</div><div class="city">' + esc(prof.label) + '</div>';
         box.hidden = false;
@@ -550,7 +556,7 @@
         sel.innerHTML = '<option value="">Select…</option>' + labels.map(l => '<option>' + esc(l) + '</option>').join('');
         pick.hidden = false;
       } else if (norm(typed).length >= 3) {
-        fail(err, 'We don\'t have a Local Hub service listed for that city yet. Try choosing one from the suggestions.');
+        fail(err, 'We don\'t have a review page for your city yet. You can continue without leaving a review.');
       }
     }
     $('rCity').addEventListener('input', resolveCity);
@@ -797,20 +803,25 @@
       btn.textContent = 'Copied \u2713'; setTimeout(() => { btn.textContent = orig; }, 1800);
     });
 
-    // Private feedback: separate from the review, same webhook, type=feedback.
+    // Private feedback is a contact note. It must not overwrite signup contact fields.
     $('fbForm').addEventListener('submit', async e => {
       e.preventDefault();
       const err = $('fbErr'); err.classList.remove('show');
       const msg = $('fbMsg').value.trim();
       if (!msg) return fail(err, 'Please type a few words first.');
+      if (!state.email) return fail(err, 'Please sign up first to send private feedback.');
       const fd = new FormData();
       fd.append('type', 'feedback'); fd.append('message', msg);
       fd.append('name', state.name); fd.append('email', state.email);
       fd.append('city', $('rCity').value.trim() || state.city);
       fd.append('profile', state.profile ? state.profile.brand : ''); fd.append('source', SOURCE);
+      fd.append('note', ['Local Hub private feedback', 'Signup city: ' + esc(state.city || 'Not provided'),
+        'Review city: ' + esc($('rCity').value.trim() || 'Not provided'),
+        'Selected location: ' + esc(state.profile ? state.profile.brand + ' (' + state.profile.label + ')' : 'None'),
+        'Feedback: ' + esc(msg).replace(/\r?\n/g, '<br>')].join('<br>'));
       const btn = $('fbBtn'); btn.disabled = true; btn.textContent = 'Sending…';
       try {
-        await post(fd);
+        await post(fd, CONTACT_TRACKING_URL);
         $('fbMsg').value = ''; $('fbForm').hidden = true; $('fbOk').classList.add('show');
         trackFunnelStage('private_feedback_sent');
       } catch (x) {

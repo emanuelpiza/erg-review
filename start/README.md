@@ -13,17 +13,17 @@ Intended entry: Local Hub ads -> https://mylocal-hub.com/start/ directly, withou
      root page's customer mode, `../index.html`): pick what stood out (efficient / professional / affordable /
      timely / friendly / everything) -> editable suggested text -> **Copy text** / **Try another**.
      It only copies text; it never opens Google, never blocks the button, and nothing is sent anywhere.
-   - Optional private "Tell us how we can improve" box -> webhook `type=feedback` (not posted publicly).
+   - Optional private "Tell us how we can improve" box -> dedicated GHL notes webhook `type=feedback` (not posted publicly).
    - `// INTEGRATION POINT: custom review step` marks where any custom review logic would plug in.
 3. **Reward** — shown to everyone who completed step 1 (does not depend on the review). Reward text/delivery still TODO.
 
 ## Contact intake (GHL)
-- Only **one** webhook is needed, and only for lead capture (+ optional private feedback). The picker itself is
+- The original webhook handles signup. A separate notes webhook handles progress and private feedback. The picker itself is
   100% client-side (static JS) and needs no n8n.
 - `WEBHOOK_URL` in `index.html` points to the existing Local Hub GHL inbound webhook. It receives multipart/form-data through a no-cors request:
   - `type=ebook`: name, email, phone, city, profile, ebook (`water-damage-guide`), source
   - `type=feedback`: message, name, email, city, profile, source
-- Published workflow: inbound webhook -> create/update contact -> tag `localhub-start-ebook`. It currently does not filter `type=feedback`; no new stage events are sent through this route. The ebook is downloaded on-page; no automatic ebook email is configured.
+- Published signup workflow: inbound webhook -> create/update contact -> tag `localhub-start-ebook`. The website now sends only signup through this route; progress and private feedback go to the dedicated notes workflow so they cannot overwrite signup fields. The ebook is downloaded on-page; no automatic ebook email is configured.
 - The root page's separate gift-card webhook (`erg-giftogram-submit`) is NOT used here.
 
 ## Rebuild the ebook
@@ -84,9 +84,9 @@ Validation used local Meta/GHL/Google mocks: two submits produced two Leads, eve
 
 ## Named contact history — November 5, 2026
 
-Candidate prepared and locally tested. GHL workflow remains a saved draft pending approval of additional metered usage, activation and a real contact-note persistence test. Main/production still uses the aggregate-only release.
+Activation and synthetic-contact testing at the disclosed usage cost were explicitly approved November 5. The dedicated GHL workflow is published. A real synthetic contact received the full journey in Notes; the local test page mocked only Meta, so no campaign Lead or public review was created.
 
-A dedicated GHL workflow, **Local Hub /start funnel progress** (`ae7d111b-f461-48f1-8140-e98578182445`), receives progress snapshots. The original signup/private-feedback webhook is unchanged. The progress workflow maps only the submitted email in Create/Update Contact, then adds a **Local Hub funnel progress** note. It does not send messages, change the stored phone/city, award rewards, or mark reviews as verified. GHL notes contain the original signup city, each observed stage/time, the city typed at that stage, selected location and the clicked Google URL.
+A dedicated GHL workflow, **Local Hub /start funnel progress** (`ae7d111b-f461-48f1-8140-e98578182445`), receives progress snapshots. The original signup webhook is preserved. Private feedback now uses the notes webhook, preventing the older intake workflow from overwriting signup city with review city. The progress workflow maps only the submitted email in Create/Update Contact, then adds a **Local Hub funnel progress** note. It does not send messages, change the stored phone/city, award rewards, or mark reviews as verified. GHL notes contain the original signup city, each observed stage/time, the city typed at that stage, selected location and the clicked Google URL.
 
 The browser batches rapid actions into one snapshot and spaces subsequent sends by at least five seconds. Each note repeats the full observed journey so an operator can read the latest note without reconciling individual clicks. Previously transmitted core stages and repeated selection of the same city/profile are deduplicated in the tab. Optional city/location changes are bounded; core stages are retained. Pending history is kept in the existing session storage and retried on a later action/reload after a transport failure. A pagehide beacon attempts to preserve the latest unsent snapshot when the tab closes. These transports cannot acknowledge GHL workflow persistence.
 
@@ -97,3 +97,10 @@ To inspect a person: **Local Hub > Contacts > filter tag localhub-start-ebook > 
 The automation list can render blank while direct workflow detail routes work. Recovery path: open a contact > Actions > Workflows > an existing/past workflow; its name opens the direct detail/log page. The builder's Workflow Switcher also provides create/open controls. No account access or browser security setting was changed to work around the list failure.
 
 Inbound webhook is an existing premium GHL feature. Each progress snapshot uses one additional premium execution; published base pricing is $0.01 per execution after included allowance, with account plans/rebilling able to affect the actual rate. No subscription upgrade or new private integration is required.
+
+## City availability fixes — November 5, 2026
+
+- Brampton now uses **BRM Restoration Services**, 2160 Williams Pkwy, Brampton, and its verified Google Maps link. This is an existing Local Hub review recipient in the Brampton contact history. The previous Greg & Sons link opened an unnamed map with no review page. The change applies only to `/start/profiles.js`; legacy root/SMS profile registries are outside this release.
+- Kingston has no approved profile in the current registry. An unmatched city now gets a neutral notice and an explicit continuation without a review. The unavailable Google button and review-text helper are hidden, the typed city is retained, and the blocked stage is recorded. The page no longer encourages selecting another city just to get past the message. Adding a Kingston review destination still requires a verified Local Hub business profile.
+
+Live regression testing caught and repaired the old private-feedback intake overwrite: after signup in Kingston and review-city selection in Brampton, feedback must add a contact note and leave the CRM city Kingston. Feedback content is escaped and stored privately in that note. Test-only contacts use `localhub-tracking-qa` and DND, with the campaign tag removed after verification.
