@@ -1,24 +1,32 @@
 (() => {
   'use strict';
   const ENDPOINT = 'https://services.leadconnectorhq.com/hooks/lbe9Un2hdxemTBsvnUKa/webhook-trigger/a54ebed1-07da-4f1f-8b12-703c495710a7';
-  const VERSION = 'customer-care-2026-11-06-v1';
+  const VERSION = 'review-2026-11-06-v2';
   const form = document.getElementById('care-form');
   const status = document.getElementById('status');
   const phone = document.getElementById('phone');
   const consent = document.getElementById('sms-consent');
   const business = document.getElementById('business');
-  const profileId = new URL(location.href).searchParams.get('p');
+  const params = new URL(location.href).searchParams;
+  const profileId = params.get('p') || params.get('profile');
   const profiles = window.PROFILE_CONFIG || {};
   const profile = Object.prototype.hasOwnProperty.call(profiles, profileId) ? profiles[profileId] : null;
   if (profile && profile.brand) {
     business.value = profile.brand;
     business.readOnly = true;
-    document.getElementById('service-intro').textContent = `How was your service with ${profile.brand}? Your honest feedback helps us improve.`;
+    document.getElementById('service-intro').textContent = `Tell us about your experience with ${profile.brand}.`;
     if (/^https:\/\/(maps\.app\.goo\.gl|share\.google)\//.test(profile.reviewUrl || '')) {
       document.getElementById('google-review').href = profile.reviewUrl;
       document.getElementById('public-review').hidden = false;
     }
   }
+  document.querySelectorAll('.rating-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      document.getElementById('rating').value = button.dataset.rating;
+      document.querySelectorAll('.rating-btn').forEach(option => option.setAttribute('aria-pressed', String(option === button)));
+      document.getElementById('rating-response').hidden = false;
+    });
+  });
   const escape = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   function validatePhone() {
     const raw = phone.value.trim();

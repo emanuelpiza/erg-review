@@ -1,9 +1,1 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Local Hub Customer Care</title>
-<script>
-const target = new URL('/customer-care/', location.origin);
-const current = new URL(location.href);
-const profile = current.searchParams.get('p') || current.searchParams.get('profile');
-if (profile && /^p_[a-z0-9]+$/.test(profile)) target.searchParams.set('p', profile);
-location.replace(target.href);
-</script></head><body><a href="/customer-care/">Continue to Local Hub Customer Care</a></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Local Hub</title><script>const target=new URL('/review/',location.origin);const current=new URL(location.href);const profile=current.searchParams.get('p')||current.searchParams.get('profile');if(profile&&/^p_[a-z0-9]+$/.test(profile))target.searchParams.set('p',profile);location.replace(target.href);</script></head><body><a href="/review/">Continue to Local Hub reviews</a></body></html>
