@@ -8,40 +8,37 @@
   <meta name="theme-color" content="#f4f6f3">
   <title>Local Hub · Questions &amp; answers</title>
   <style>
-    :root { color-scheme: light; --ink:#203a32; --muted:#63736a; --green:#27664e; --line:#dde5de; --paper:#fff; --bg:#f4f6f3; }
+    :root { color-scheme:light; --ink:#203a32; --muted:#63736a; --green:#27664e; --line:#d6dfd7; --bg:#f7f8f5; }
     * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     main { max-width:840px; margin:auto; padding:54px 24px 32px; }
     .brand { display:flex; align-items:center; gap:11px; color:var(--green); font-size:13px; font-weight:750; letter-spacing:.12em; text-transform:uppercase; }
     .brand-mark { display:grid; place-items:center; width:31px; height:31px; border-radius:10px; background:var(--green); color:#fff; font-size:18px; letter-spacing:0; }
-    h1 { margin:24px 0 8px; font-size:clamp(32px,5.5vw,46px); line-height:1.16; font-weight:680; letter-spacing:-.045em; }
-    .intro { margin:0 0 29px; color:var(--muted); font-size:17px; }
-    .search { position:relative; margin-bottom:24px; }
+    h1 { margin:24px 0 30px; font-size:clamp(32px,5.5vw,46px); line-height:1.16; font-weight:680; letter-spacing:-.045em; }
+    .search { position:relative; margin-bottom:30px; }
     .search svg { position:absolute; top:18px; left:18px; color:var(--muted); pointer-events:none; }
-    input { display:block; width:100%; min-height:56px; border:1px solid #cbd7ce; background:var(--paper); border-radius:13px; padding:15px 18px 15px 48px; color:var(--ink); font:inherit; }
+    input { display:block; width:100%; min-height:56px; border:1px solid #cbd7ce; background:#fff; border-radius:10px; padding:15px 18px 15px 48px; color:var(--ink); font:inherit; }
     input::placeholder { color:#748177; }
-    input:focus-visible,summary:focus-visible,button:focus-visible,a:focus-visible { outline:3px solid #8dc7a8; outline-offset:4px; }
-    details { background:var(--paper); border:1px solid var(--line); border-radius:15px; margin:12px 0; overflow:hidden; }
-    summary { cursor:pointer; list-style:none; display:flex; gap:16px; align-items:center; justify-content:space-between; padding:20px 23px; font-size:17px; line-height:1.5; font-weight:640; }
-    summary::-webkit-details-marker { display:none; }
-    summary::after { content:"+"; flex:none; font-size:24px; font-weight:400; line-height:1; color:var(--green); }
-    details[open] summary::after { content:"−"; }
-    details[open] summary { padding-bottom:12px; }
-    .answer { padding:0 23px 23px; }
+    input:focus-visible,button:focus-visible,a:focus-visible { outline:3px solid #8dc7a8; outline-offset:4px; }
+    .faq-item { padding:26px 0; border-top:1px solid var(--line); }
+    h2 { margin:0 0 15px; font-size:18px; line-height:1.45; font-weight:650; letter-spacing:-.015em; }
     .answer p { margin:0 0 13px; }
     .answer p:last-child { margin-bottom:0; }
-    .reply { margin:0; padding:17px 19px; border-left:3px solid #80aa91; border-radius:0 8px 8px 0; background:#f2f7f3; color:#31483c; overflow-wrap:anywhere; }
+    .reply-box { position:relative; border-radius:9px; background:#eef3ee; }
+    .reply { margin:0; padding:18px 60px 18px 19px; color:#31483c; overflow-wrap:anywhere; }
     .reply a { color:var(--green); text-underline-offset:3px; }
-    .actions { display:flex; align-items:center; gap:14px; margin-top:15px; }
-    button { cursor:pointer; background:var(--paper); border:1px solid #bfcec1; border-radius:8px; padding:8px 13px; color:var(--green); font:600 14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    button:hover { background:#eef5ef; border-color:var(--green); }
+    .copy { position:absolute; top:8px; right:8px; display:grid; place-items:center; width:40px; height:40px; padding:0; border:0; border-radius:7px; background:transparent; color:#5d7968; cursor:pointer; }
+    .copy:hover { background:#dce8df; color:var(--green); }
+    .check-icon { display:none; }
+    .copy[data-copied] .copy-icon { display:none; }
+    .copy[data-copied] .check-icon { display:block; }
     .note { color:var(--muted); font-size:14px; }
     .empty { padding:28px 0; color:var(--muted); }
     [hidden] { display:none !important; }
-    footer { margin-top:25px; color:var(--muted); font-size:12px; }
+    footer { padding-top:22px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-    @media(max-width:560px) { main { padding:31px 18px 25px; } .intro { font-size:16px; } summary { padding:18px; font-size:16px; } .answer { padding:0 18px 19px; } .reply { padding:14px; } }
-    @media(prefers-reduced-motion:no-preference) { button { transition:background .15s,border-color .15s; } }
+    @media(max-width:560px) { main { padding:31px 18px 25px; } .faq-item { padding:23px 0; } h2 { font-size:17px; } .reply { padding:15px 54px 15px 15px; } }
+    @media(prefers-reduced-motion:no-preference) { .copy { transition:background .15s,color .15s; } }
   </style>
 </head>
 <body>
@@ -49,7 +46,6 @@
     <header>
       <div class="brand"><span class="brand-mark" aria-hidden="true">↗</span> Local Hub</div>
       <h1>Questions &amp; answers</h1>
-      <p class="intro">Clear answers for everyday conversations.</p>
     </header>
     <div class="search" role="search">
       <label class="sr-only" for="search">Search questions and answers</label>
@@ -57,50 +53,45 @@
       <input id="search" type="search" placeholder="Search a question…" autocomplete="off">
     </div>
     <section aria-label="Questions and answers" id="questions">
-      <details open id="about">
-        <summary>What is Local Hub?</summary>
+      <article class="faq-item" id="about">
+        <h2>What is Local Hub?</h2>
         <div class="answer">
-          <div class="reply" id="reply-about">Local Hub is a collaborative network that partners with local businesses to educate people about common issues like water damage and leaks.</div>
-          <div class="actions"><button type="button" data-copy="reply-about" aria-label="Copy reply about Local Hub">Copy reply</button></div>
+          <div class="reply-box"><button class="copy" type="button" data-copy="reply-about" aria-label="Copy reply about Local Hub" title="Copy reply"><svg class="copy-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><svg class="check-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 12 4 4L19 6"/></svg></button><div class="reply" id="reply-about">Local Hub is a collaborative network that partners with local businesses to educate people about common issues like water damage and leaks.</div></div>
         </div>
-      </details>
-      <details id="ebook">
-        <summary>Can you resend the ebook?</summary>
+      </article>
+      <article class="faq-item" id="ebook">
+        <h2>How can I access the e-book?</h2>
         <div class="answer">
-          <div class="reply" id="reply-ebook">Here’s the water damage guide you asked for: <a href="https://mylocal-hub.com/start/ebook/water-damage-guide.pdf" target="_blank" rel="noopener noreferrer">https://mylocal-hub.com/start/ebook/water-damage-guide.pdf</a> Let us know what you think once you’ve read it.</div>
-          <div class="actions"><button type="button" data-copy="reply-ebook" aria-label="Copy reply with the ebook link">Copy reply</button></div>
-          <p class="note" style="margin-top:13px">Send the guide link directly when it is requested.</p>
+          <div class="reply-box"><button class="copy" type="button" data-copy="reply-ebook" aria-label="Copy reply with the ebook link" title="Copy reply"><svg class="copy-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><svg class="check-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 12 4 4L19 6"/></svg></button><div class="reply" id="reply-ebook">Here’s the link to our latest e-book: <a href="https://mylocal-hub.com/start/ebook/water-damage-guide.pdf" target="_blank" rel="noopener noreferrer">https://mylocal-hub.com/start/ebook/water-damage-guide.pdf</a> Take a look and let us know whether you’d recommend it.</div></div>
         </div>
-      </details>
-      <details id="feedback">
-        <summary>What review are you asking for?</summary>
+      </article>
+      <article class="faq-item" id="feedback">
+        <h2>What review are you asking for?</h2>
         <div class="answer">
-          <div class="reply" id="reply-feedback">Sorry for the confusion. We’re asking for your honest feedback on the ebook. You don’t need to review a business you haven’t used.</div>
-          <div class="actions"><button type="button" data-copy="reply-feedback" aria-label="Copy reply about ebook feedback">Copy reply</button></div>
+          <div class="reply-box"><button class="copy" type="button" data-copy="reply-feedback" aria-label="Copy reply about educational feedback" title="Copy reply"><svg class="copy-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><svg class="check-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 12 4 4L19 6"/></svg></button><div class="reply" id="reply-feedback">We work with local partners to share educational materials about common issues like water damage and leaks. We’re looking for honest reviews to help us evaluate and improve those materials.</div></div>
         </div>
-      </details>
-      <details id="already-reviewed">
-        <summary>I already left a review. What should I do?</summary>
+      </article>
+      <article class="faq-item" id="already-reviewed">
+        <h2>After leaving a review, what should I do?</h2>
         <div class="answer">
-          <div class="reply" id="reply-already">Thanks for letting us know. You don’t need to post the same review again.</div>
-          <div class="actions"><button type="button" data-copy="reply-already" aria-label="Copy reply about an existing review">Copy reply</button></div>
+          <div class="reply-box"><button class="copy" type="button" data-copy="reply-already" aria-label="Copy reply about what to do after reviewing" title="Copy reply"><svg class="copy-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><svg class="check-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 12 4 4L19 6"/></svg></button><div class="reply" id="reply-already">Send us a screenshot of your feedback so we can track it on our end. If friends or family would also like to evaluate the material, you can share their contact details with their permission and we’ll get in touch. They receive a bonus for evaluating the material, and you receive a referral bonus.</div></div>
           <p class="note" style="margin-top:13px">Check the earlier conversation before requesting another action. Only ask for a business review about a genuine personal experience.</p>
         </div>
-      </details>
-      <details id="update">
-        <summary>How should I answer a request for an update?</summary>
+      </article>
+      <article class="faq-item" id="update">
+        <h2>How should I answer a request for an update?</h2>
         <div class="answer">
           <p>Read what was promised. Confirm the current status with the team, then answer that specific question with the confirmed result.</p>
           <p>Prioritize unanswered questions and open promises. If another person needs to check something, agree who will follow up and when. Keep the conversation open until the question is resolved.</p>
           <p class="note">Only confirm that an action is complete after it has been verified.</p>
         </div>
-      </details>
-      <details id="stop">
-        <summary>What if someone asks us to stop texting?</summary>
+      </article>
+      <article class="faq-item" id="stop">
+        <h2>What if someone asks us to stop texting?</h2>
         <div class="answer">
           <p>Respect the SMS opt-out. Keep it in place and do not send further texts or add the person to another SMS follow-up.</p>
         </div>
-      </details>
+      </article>
     </section>
     <p id="empty" class="empty" hidden>No matching question. Try a different word.</p>
     <p id="status" class="sr-only" role="status" aria-live="polite"></p>
@@ -108,15 +99,14 @@
   </main>
   <script>
     const search = document.getElementById('search');
-    const entries = [...document.querySelectorAll('#questions details')];
+    const entries = [...document.querySelectorAll('#questions .faq-item')];
     const status = document.getElementById('status');
     search.addEventListener('input', () => {
       const query = search.value.trim().toLocaleLowerCase();
       let matches = 0;
-      entries.forEach((entry, index) => {
+      entries.forEach(entry => {
         const match = !query || entry.textContent.toLocaleLowerCase().includes(query);
         entry.hidden = !match;
-        entry.open = query ? match : index === 0;
         if (match) matches++;
       });
       document.getElementById('empty').hidden = matches > 0;
@@ -127,9 +117,10 @@
         const reply = document.getElementById(button.dataset.copy);
         try {
           await navigator.clipboard.writeText(reply.innerText);
-          button.textContent = 'Copied';
+          button.dataset.copied = 'true';
+          button.title = 'Copied';
           status.textContent = 'Reply copied.';
-          setTimeout(() => { button.textContent = 'Copy reply'; }, 1800);
+          setTimeout(() => { delete button.dataset.copied; button.title = 'Copy reply'; }, 1800);
         } catch {
           const range = document.createRange();
           range.selectNodeContents(reply);
