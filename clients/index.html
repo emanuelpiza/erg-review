@@ -97,6 +97,15 @@
     .follow-title{font-size:15px;font-weight:700;text-align:left;margin-bottom:12px;line-height:1.35}
     .follow-title.center{text-align:center}
     .edit-hint{font-size:13px;color:#1a2332;margin:-4px 0 8px;text-align:left}
+    .service-step{margin:0 0 4px}
+    .service-caption{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6b7785;text-align:center;margin-bottom:10px}
+    .service-toggle{display:grid;grid-template-columns:1fr;gap:6px;background:#f1f4f8;border-radius:14px;padding:5px}
+    .service-option{display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:0;border-radius:10px;padding:11px 10px;font-family:inherit;font-size:14px;font-weight:600;color:#55606e;cursor:pointer;transition:background .18s,color .18s,box-shadow .18s}
+    .service-option .service-icon{font-size:17px;line-height:1}
+    .service-option:hover{color:#1a2332}
+    .service-option:focus-visible{outline:2px solid #4285f4;outline-offset:2px}
+    .service-option.selected{background:#fff;color:#1557b0;box-shadow:0 1px 2px rgba(16,24,40,.08),0 2px 8px rgba(16,24,40,.08)}
+    @media (min-width:480px){.service-toggle{grid-template-columns:repeat(3,minmax(0,1fr))}}
     .like-grid{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 18px}
     .like-option{background:#fff;border:1px solid #247899;border-radius:8px;color:#3a84b8;text-align:center;padding:11px 14px;font-size:14px;font-weight:500}
     .like-option:hover{background:#f7fbff}
@@ -168,6 +177,10 @@
       </div>
       <div id="customer-followup" class="customer-followup">
         <div class="customer-divider"></div>
+        <div class="service-step" id="customer-step-service">
+          <div class="service-caption">Which service did we help you with?</div>
+          <div class="service-toggle" id="service-toggle" role="radiogroup" aria-label="Service type"></div>
+        </div>
         <div class="step customer-step" id="customer-step-standout">
           <h2 class="follow-title center">What did you like the most?</h2>
           <div class="like-grid" id="standout-chips"></div>
@@ -397,9 +410,46 @@
       el.addEventListener('click', () => { selectedRating = null; show('rating'); });
     });
 
+    const SERVICE_TYPES = [
+      { key: 'water', label: 'Water Damage', icon: '💧',
+        services: ['water damage restoration','water damage repair','flood cleanup','emergency flood cleanup','flood damage cleanup','water cleanup','flood repair','water mitigation','water remediation','basement water restoration'],
+        companies: ['restoration company','water damage service','water removal company','flood restoration service'] },
+      { key: 'roofing', label: 'Roofing', icon: '🏠',
+        services: ['roof repair','roof replacement','emergency roof repair','storm damage roof repair','roof insurance claim repair','roof tarp'],
+        companies: ['roofing contractor','roofer'] },
+      { key: 'spill', label: 'Spill Cleanup', icon: '🛢️',
+        services: ['spill cleanup','emergency spill cleanup','diesel spill cleanup','fuel spill cleanup','chemical spill cleanup','truck spill cleanup','highway spill cleanup','cargo spill cleanup','hazmat cleanup'],
+        companies: ['spill response company','hazmat cleanup company'] }
+    ];
+
+    function initialService(){
+      const keys = SERVICE_TYPES.map(item => item.key);
+      const fromUrl = (new URLSearchParams(location.search).get('s') || '').toLowerCase();
+      if (keys.includes(fromUrl)) return fromUrl;
+      if (cfg && keys.includes(cfg.service)) return cfg.service;
+      return keys[0];
+    }
+
     const customerState = {
-      standouts: []
+      standouts: [],
+      service: initialService()
     };
+
+    const KEYWORD_OPENERS = [
+      'I had a great experience with the team on my {s}.',
+      'I was really happy with the {s} from start to finish.',
+      'The team made the {s} easier than I expected.',
+      'I had a smooth experience with the {s} and felt well taken care of.',
+      'I was impressed with the {s} and the way everything was managed.',
+      'I needed {s} and the whole process felt clear and well handled.'
+    ];
+
+    const KEYWORD_CLOSERS = [
+      'I would recommend them to anyone looking for a {c}.',
+      'I am glad I chose this {c} and would recommend the team.',
+      'I would use this {c} again.',
+      'If you need a {c}, I would be comfortable recommending them.'
+    ];
 
     const STANDOUT_OPTIONS = [
       'efficient',
@@ -621,7 +671,10 @@
         const fragments = REVIEW_FRAGMENTS[option] || REVIEW_FRAGMENTS.Everything;
         return buildReviewSentence(randomFrom(fragments), index);
       });
-      textarea.value = `${randomFrom(REVIEW_OPENERS)} ${details.join(' ')} ${randomFrom(REVIEW_CLOSERS)}`;
+      const service = SERVICE_TYPES.find(item => item.key === customerState.service) || SERVICE_TYPES[0];
+      const opener = randomFrom(KEYWORD_OPENERS).replace('{s}', randomFrom(service.services));
+      const closer = randomFrom(KEYWORD_CLOSERS).replace('{c}', randomFrom(service.companies));
+      textarea.value = `${opener} ${details.join(' ')} ${closer}`;
     }
 
     function updateCustomerSteps(){
@@ -660,6 +713,38 @@
         chip.textContent = selected ? `👍 ${label}` : label;
       });
     }
+
+    (function buildServiceToggle(){
+      const container = document.getElementById('service-toggle');
+      const refresh = () => {
+        container.querySelectorAll('.service-option').forEach(btn => {
+          const selected = btn.dataset.key === customerState.service;
+          btn.classList.toggle('selected', selected);
+          btn.setAttribute('aria-checked', selected ? 'true' : 'false');
+        });
+      };
+      SERVICE_TYPES.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'service-option';
+        btn.dataset.key = item.key;
+        btn.setAttribute('role', 'radio');
+        const icon = document.createElement('span');
+        icon.className = 'service-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = item.icon;
+        const label = document.createElement('span');
+        label.textContent = item.label;
+        btn.append(icon, label);
+        btn.addEventListener('click', () => {
+          customerState.service = item.key;
+          refresh();
+          if (customerState.standouts.length) updateSuggestedReview();
+        });
+        container.appendChild(btn);
+      });
+      refresh();
+    })();
 
     buildChips('standout-chips', STANDOUT_OPTIONS, option => customerState.standouts.includes(option), (option) => {
       const hasOption = customerState.standouts.includes(option);
