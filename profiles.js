@@ -69,4 +69,6 @@ window.PROFILE_CONFIG = {
       "p_5bdd8281": {"label": "Edinburgh, UK", "brand": "Resto Experts", "city": "Edinburgh", "country": "UK", "reviewUrl": "https://maps.app.goo.gl/JuUMMC6FjDMe34xk6"},
       "p_f5238e68": {"label": "Leicester, UK", "brand": "Pinnacle Restoration", "city": "Leicester", "country": "UK", "reviewUrl": "https://maps.app.goo.gl/xhfDicVsYswCz29v6"},
       "p_728de6db": {"label": "Leeds, UK", "brand": "All Pro Restoration", "city": "Leeds", "country": "UK", "reviewUrl": "https://maps.app.goo.gl/Ap9DSJRUnzxiWYss5"},
+      "p_4c1e7a92": {"label": "Dallas, Texas", "brand": "ER2 Quick Spill Response", "city": "Dallas", "state": "Texas", "country": "USA", "service": "spill", "reviewUrl": "https://maps.app.goo.gl/RCnq4eAzxybMVf9y7"},
+      "p_9b3d06e5": {"label": "Dallas, Texas", "brand": "Lone Star Roofing Dallas", "city": "Dallas", "state": "Texas", "country": "USA", "service": "roofing", "reviewUrl": "https://maps.app.goo.gl/37ahVCNc8NUeAAXi6"},
 };
